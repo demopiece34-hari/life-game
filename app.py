@@ -129,7 +129,29 @@ if choice == "🏠 Dashboard":
     <p style='text-align:center;'>🎯 Remaining Days: {remaining_days}</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # ---------- DATE & DAY (BOTTOM CENTER) ----------
+    current_day = today.strftime("%A")
+    current_date = today.strftime("%d-%m-%Y")
 
+    st.markdown(f"""
+    <div style='
+        position:fixed;
+        bottom:10px;
+        left:50%;
+        transform:translateX(-50%);
+        background:rgba(255,255,255,0.08);
+        padding:10px 20px;
+        border-radius:15px;
+        backdrop-filter:blur(10px);
+        text-align:center;
+        font-size:14px;
+        animation:fade 1s;
+    '>
+        📅 {current_day} | {current_date}
+    </div>
+    """, unsafe_allow_html=True)
+    
 # ---------- MISSIONS ----------
 elif choice == "🎮 Missions":
 
