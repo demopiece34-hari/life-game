@@ -1,145 +1,148 @@
 import streamlit as st
-import json
-import os
+import json, os
 from datetime import date
 import plotly.graph_objects as go
+import plotly.express as px
 
-# ---------- CONFIG ----------
-st.set_page_config(page_title="Life Game 🎯", layout="wide")
+st.set_page_config(page_title="Life Game ULTRA 🎯", layout="wide")
 
-# ---------- CUSTOM CSS (GAMING UI) ----------
+# ---------- SOUND ----------
 st.markdown("""
-<style>
-body {
-    background-color: #0f172a;
-    color: white;
+<audio id="ding" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<script>
+function playSound(){
+    document.getElementById("ding").play();
 }
-.big-title {
-    font-size: 40px;
-    font-weight: bold;
-    color: #22c55e;
-}
-.card {
-    padding: 15px;
-    border-radius: 15px;
-    background: #1e293b;
-    box-shadow: 0px 0px 10px #22c55e;
-}
-</style>
+</script>
 """, unsafe_allow_html=True)
 
-# ---------- FILE ----------
+# ---------- DATA ----------
 DATA_FILE = "data.json"
 
-# ---------- LOAD ----------
 def load():
+    default = {
+        "points": 0, "streak": 0, "last": "", "xp": 0,
+        "avatar": "😎", "history": {}
+    }
     if not os.path.exists(DATA_FILE):
-        return {"points": 0, "streak": 0, "last": "", "xp": 0}
-    return json.load(open(DATA_FILE))
+        return default
+    data = json.load(open(DATA_FILE))
+    for k in default:
+        if k not in data:
+            data[k] = default[k]
+    return data
 
 def save(d):
     json.dump(d, open(DATA_FILE, "w"))
 
 data = load()
-
 today = str(date.today())
 
-# ---------- TASKS ----------
-tasks = [
-    "Wake 5:30","Brush","Bath","Prayer","Washing",
-    "Reading","English","Python",
-    "Water 2L","No Junk",
-    "Walking","Exercise","Kegel",
-    "MA001","PN002",
-    "YouTube","Instagram","Movie",
-    "Oil Bath"
-]
-
-# ---------- TITLE ----------
-st.markdown('<div class="big-title">🎯 LIFE GAME PRO</div>', unsafe_allow_html=True)
+# ---------- NAVIGATION ----------
+menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","🧑 Profile"]
+choice = st.sidebar.radio("Navigation", menu)
 
 # ---------- SIDEBAR ----------
-st.sidebar.header("🏆 PLAYER")
-
 level = data["xp"] // 100
-st.sidebar.write(f"🎮 Level: {level}")
+st.sidebar.write(f"{data['avatar']} Level {level}")
 st.sidebar.write(f"⚡ XP: {data['xp']}")
 st.sidebar.write(f"💯 Points: {data['points']}")
 st.sidebar.write(f"🔥 Streak: {data['streak']}")
 
-# ---------- TASK UI ----------
-st.subheader("🎮 Daily Missions")
+# ---------- TASK GROUPS ----------
+task_groups = {
+    "Morning": ["Wake 5:30","Brush","Bath","Prayer","Washing"],
+    "Learning": ["Reading","English","Python"],
+    "Health": ["Water 2L","No Junk"],
+    "Workout": ["Walking","Exercise","Kegel"],
+    "Control": ["MA001","PN002"],
+    "Entertainment": ["YouTube","Instagram","Movie"],
+    "Weekend": ["Oil Bath"]
+}
 
-cols = st.columns(3)
+# ---------- DASHBOARD ----------
+if choice == "🏠 Dashboard":
+    st.title("🎯 LIFE GAME ULTRA")
 
-done = 0
-status = {}
+    progress = data.get("last_score",0)
 
-for i, t in enumerate(tasks):
-    with cols[i % 3]:
-        c = st.checkbox(t)
-        status[t] = c
-        if c:
-            done += 1
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=progress,
+        title={'text': "Today's Progress"},
+        gauge={'axis': {'range':[0,100]}}
+    ))
+    st.plotly_chart(fig)
 
-total = len(tasks)
-progress = done / total
-score = int(progress * 100)
+    st.success("🔥 Stay Consistent!")
 
-# ---------- CIRCULAR GRAPH ----------
-fig = go.Figure(go.Indicator(
-    mode="gauge+number",
-    value=score,
-    title={'text': "Completion %"},
-    gauge={
-        'axis': {'range': [0, 100]},
-        'bar': {'color': "#22c55e"}
-    }
-))
+# ---------- MISSIONS ----------
+elif choice == "🎮 Missions":
 
-st.plotly_chart(fig, use_container_width=True)
+    st.title("🎮 Daily Missions")
 
-st.progress(progress)
+    done = 0
+    total = 0
 
-# ---------- STATUS ----------
-if score == 100:
-    st.success("🚀 LEVEL UP! PERFECT DAY!")
-elif score < 50:
-    st.error("❌ GAME OVER!")
+    for group, tasks in task_groups.items():
+        with st.expander(group):
+            for t in tasks:
+                total += 1
+                key = f"{today}_{t}"
 
-# ---------- SAVE ----------
-if st.button("💾 SAVE PROGRESS"):
+                checked = st.checkbox(t, key=key)
 
-    if data["last"] != today:
-        data["streak"] += 1
-    data["last"] = today
+                if checked:
+                    st.markdown(f"✅ {t}")
+                    st.markdown("<script>playSound()</script>", unsafe_allow_html=True)
+                    done += 1
 
-    earn = done * 10
-    data["points"] += earn
-    data["xp"] += earn
+    score = int((done/total)*100)
 
-    save(data)
+    st.progress(score/100)
+    st.write(f"🎯 Score: {score}")
 
-    st.success(f"🔥 +{earn} XP Earned!")
+    if st.button("💾 SAVE"):
+        earn = done * 10
+        data["xp"] += earn
+        data["points"] += earn
+        data["last"] = today
+        data["last_score"] = score
 
-# ---------- REWARDS ----------
-st.subheader("🎁 Rewards")
+        # history
+        data["history"][today] = score
 
-if data["points"] >= 100:
-    st.success("😴 Rest Day Unlocked")
-if data["points"] >= 300:
-    st.success("🎉 Fun Day Unlocked")
-if data["points"] >= 500:
-    st.success("📚 Skip Study Day")
-if data["points"] >= 1000:
-    st.success("🏖️ Full Relax Day")
+        save(data)
+        st.success(f"🔥 +{earn} XP!")
 
-# ---------- MOTIVATION ----------
-st.subheader("💡 Motivation")
+# ---------- STATS ----------
+elif choice == "📊 Stats":
 
-if score == 100:
-    st.write("🔥 YOU ARE UNSTOPPABLE")
-elif score > 70:
-    st.write("💪 GREAT JOB")
-else:
-    st.write("⚡ TRY HARDER TOMORROW")
+    st.title("📊 Weekly Stats")
+
+    history = data.get("history", {})
+
+    if history:
+        dates = list(history.keys())[-7:]
+        scores = [history[d] for d in dates]
+
+        fig = px.line(x=dates, y=scores, markers=True,
+                      title="Last 7 Days Performance")
+
+        st.plotly_chart(fig)
+    else:
+        st.info("No data yet")
+
+# ---------- PROFILE ----------
+elif choice == "🧑 Profile":
+
+    st.title("🧑 Player Profile")
+
+    avatars = ["😎","🔥","👑","💪","🤖"]
+
+    selected = st.selectbox("Choose Avatar", avatars)
+
+    if st.button("SAVE AVATAR"):
+        data["avatar"] = selected
+        save(data)
+        st.success("Avatar Updated!")
