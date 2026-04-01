@@ -3,159 +3,170 @@ import json, os
 from datetime import date
 import plotly.express as px
 
-st.set_page_config(page_title="Life Game LEGEND 👑", layout="wide")
-
-# ---------- CSS (APP FEEL) ----------
-st.markdown("""
-<style>
-/* Glow animation */
-@keyframes glow {
-  from { box-shadow: 0 0 5px #22c55e; }
-  to { box-shadow: 0 0 20px #22c55e; }
-}
-
-/* Floating profile button */
-.profile-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #22c55e;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    text-align: center;
-    font-size: 30px;
-    line-height: 60px;
-    cursor: pointer;
-    animation: glow 1s infinite alternate;
-}
-
-/* Card */
-.card {
-    padding: 15px;
-    border-radius: 15px;
-    background: #1e293b;
-    margin: 10px 0;
-}
-</style>
-""", unsafe_allow_html=True)
+st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
 
 # ---------- DATA ----------
 DATA_FILE = "data.json"
 
 def load():
     default = {
-        "points":0,"streak":0,"last":"","xp":0,
-        "avatar":"😎","name":"Player","history":{},"badges":[]
+        "points": 0, "streak": 0, "last": "", "xp": 0,
+        "avatar": "😎", "history": {}, "badges": []
     }
     if not os.path.exists(DATA_FILE):
         return default
     data = json.load(open(DATA_FILE))
     for k in default:
         if k not in data:
-            data[k]=default[k]
+            data[k] = default[k]
     return data
 
 def save(d):
-    json.dump(d, open(DATA_FILE,"w"))
+    json.dump(d, open(DATA_FILE, "w"))
 
 data = load()
 today = str(date.today())
 
-# ---------- PROFILE BUTTON ----------
-if "show_profile" not in st.session_state:
-    st.session_state.show_profile = False
+# ---------- NAV ----------
+menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","🧑 Profile","⚙️ Settings"]
+choice = st.sidebar.radio("Navigation", menu)
 
-if st.button(f"{data['avatar']}", key="profile"):
-    st.session_state.show_profile = not st.session_state.show_profile
+# ---------- SIDEBAR ----------
+level = data["xp"] // 100
+st.sidebar.markdown(f"# {data['avatar']} LEVEL {level}")
+st.sidebar.write(f"⚡ XP: {data['xp']}")
+st.sidebar.write(f"💯 Points: {data['points']}")
+st.sidebar.write(f"🔥 Streak: {data['streak']}")
 
-# ---------- PROFILE POPUP ----------
-if st.session_state.show_profile:
-    st.markdown("### 🧑 Profile Panel")
-    st.write(f"👤 Name: {data['name']}")
-    st.write(f"🎮 Level: {data['xp']//100}")
-    st.write(f"⚡ XP: {data['xp']}")
-    st.write(f"💯 Points: {data['points']}")
-    st.write(f"🔥 Streak: {data['streak']}")
-
-# ---------- NAV (APP STYLE) ----------
-page = st.selectbox("📱 Menu", ["🏠 Dashboard","🎮 Missions","📊 Stats","⚙️ Settings"])
+# ---------- TASKS ----------
+task_groups = {
+    "Morning": ["Wake 5:30","Brush","Bath","Prayer","Washing"],
+    "Learning": ["Reading","English","Python"],
+    "Health": ["Water 2L","No Junk"],
+    "Workout": ["Walking","Exercise","Kegel"],
+    "Control": ["MA001","PN002"],
+    "Entertainment": ["YouTube","Instagram","Movie"],
+    "Weekend": ["Oil Bath"]
+}
 
 # ---------- DASHBOARD ----------
-if page == "🏠 Dashboard":
-    st.title("👑 LIFE GAME LEGEND")
+if choice == "🏠 Dashboard":
+    st.title("🎯 LIFE GAME GOD MODE")
 
     st.markdown(f"""
-    <div class="card">
-    <h1 style='text-align:center'>{data['avatar']}</h1>
-    <h3 style='text-align:center'>Welcome {data['name']}</h3>
-    </div>
+    <h1 style='font-size:80px; text-align:center; animation: float 2s infinite;'>
+    {data['avatar']}
+    </h1>
+    <style>
+    @keyframes float {{
+        0% {{ transform: translateY(0px); }}
+        50% {{ transform: translateY(-20px); }}
+        100% {{ transform: translateY(0px); }}
+    }}
+    </style>
     """, unsafe_allow_html=True)
 
+    st.success("🔥 Stay Consistent!")
+
 # ---------- MISSIONS ----------
-elif page == "🎮 Missions":
+elif choice == "🎮 Missions":
 
-    st.title("🎮 Missions")
+    st.title("🎮 Daily Missions")
 
-    groups = {
-        "Morning":["Wake","Brush","Bath","Prayer","Washing"],
-        "Learning":["Reading","English","Python"],
-        "Workout":["Walking","Exercise","Kegel"]
-    }
+    done = 0
+    total = 0
 
-    done=0
-    total=0
-
-    for g,tasks in groups.items():
-        with st.expander(g):
+    for group, tasks in task_groups.items():
+        with st.expander(group):
             for t in tasks:
-                total+=1
-                if st.checkbox(t):
-                    st.success(f"✅ {t}")
-                    done+=1
+                total += 1
+                key = f"{today}_{t}"
+                if st.checkbox(t, key=key):
+                    done += 1
 
-    score=int((done/total)*100)
+    score = int((done/total)*100)
+
     st.progress(score/100)
+    st.write(f"🎯 Score: {score}")
 
-    if st.button("SAVE"):
-        earn=done*10
-        data["xp"]+=earn
-        data["points"]+=earn
+    # ---------- BADGES ----------
+    if score == 100 and "PERFECT" not in data["badges"]:
+        data["badges"].append("🏆 PERFECT DAY")
+
+    if score >= 70 and "CONSISTENT" not in data["badges"]:
+        data["badges"].append("🔥 CONSISTENT")
+
+    if st.button("💾 SAVE"):
+        earn = done * 10
+        data["xp"] += earn
+        data["points"] += earn
+        data["last"] = today
+        data["history"][today] = score
         save(data)
-        st.success(f"+{earn} XP 🔥")
+
+        st.success(f"🔥 +{earn} XP!")
 
 # ---------- STATS ----------
-elif page == "📊 Stats":
-    st.title("📊 Stats")
+elif choice == "📊 Stats":
 
-    if data["history"]:
-        fig=px.line(x=list(data["history"].keys()),
-                    y=list(data["history"].values()))
+    st.title("📊 Weekly Stats")
+
+    history = data.get("history", {})
+
+    if history:
+        dates = list(history.keys())[-7:]
+        scores = [history[d] for d in dates]
+
+        fig = px.line(x=dates, y=scores, markers=True)
         st.plotly_chart(fig)
+    else:
+        st.info("No data")
+
+# ---------- PROFILE ----------
+elif choice == "🧑 Profile":
+
+    st.title("🧑 Profile")
+
+    avatars = ["😎","🔥","👑","💪","🤖"]
+
+    selected = st.selectbox("Choose Avatar", avatars)
+
+    if st.button("SAVE AVATAR"):
+        data["avatar"] = selected
+        save(data)
+        st.success("Updated!")
+
+    st.subheader("🏆 Badges")
+    if data["badges"]:
+        for b in data["badges"]:
+            st.success(b)
+    else:
+        st.info("No badges yet")
 
 # ---------- SETTINGS ----------
-elif page == "⚙️ Settings":
+elif choice == "⚙️ Settings":
 
-    st.title("⚙️ Settings")
+    st.title("⚙️ Settings - Reset System")
 
-    name = st.text_input("Enter Name", data["name"])
+    password = st.text_input("Enter Password", type="password")
 
-    if st.button("Save Name"):
-        data["name"]=name
-        save(data)
-        st.success("Saved!")
+    if st.button("RESET ALL DATA"):
+        if password == "h1a2r3i4s5h6":
 
-    st.subheader("Reset")
+            reset_data = {
+                "points": 0,
+                "streak": 0,
+                "last": "",
+                "xp": 0,
+                "avatar": "😎",
+                "history": {},
+                "badges": []
+            }
 
-    pwd = st.text_input("Password", type="password")
+            save(reset_data)
 
-    if st.button("RESET"):
-        if pwd=="h1a2r3i4s5h6":
-            save({
-                "points":0,"streak":0,"last":"",
-                "xp":0,"avatar":"😎","name":"Player",
-                "history":{},"badges":[]
-            })
-            st.success("Reset Done 🔄")
+            st.success("✅ FULL RESET DONE")
+            st.warning("Restart App 🔄")
+
         else:
-            st.error("Wrong Password ❌")
+            st.error("❌ Wrong Password")
