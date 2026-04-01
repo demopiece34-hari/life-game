@@ -257,16 +257,46 @@ elif choice == "🧑 Profile":
 # ---------- SETTINGS ----------
 elif choice == "⚙️ Settings":
 
-    st.markdown("<div class='card'>⚙️ Settings Panel</div>",unsafe_allow_html=True)
+    st.markdown("<div class='card'>⚙️ Settings Panel</div>", unsafe_allow_html=True)
 
-    pwd=st.text_input("Password",type="password")
+    pwd = st.text_input("Enter Password", type="password")
 
-    if st.button("RESET"):
-        if pwd=="h1a2r3i4s5h6":
-            save({
-                "points":0,"xp":0,"streak":0,"last":"",
-                "avatar":"😎","name":"Player","dream":"",
-                "history":{},"reasons":{},
-                "start_date":str(date.today())
-            })
-            st.success("Reset Done")
+    # ⚠️ CONFIRM CHECKBOX (NEW ADD)
+    confirm = st.checkbox("⚠️ Are you sure you want to reset ALL data?")
+
+    if st.button("RESET ALL DATA 💀"):
+
+        if not confirm:
+            st.warning("⚠️ Please confirm reset")
+        
+        elif pwd == "h1a2r3i4s5h6":
+
+            # 🔥 FULL RESET DATA
+            reset_data = {
+                "points": 0,
+                "xp": 0,
+                "streak": 0,
+                "last": "",
+                "avatar": "😎",
+                "name": "Player",
+                "dream": "",
+                "history": {},
+                "reasons": {},
+                "start_date": str(date.today())
+            }
+
+            # 💾 SAVE CLEAN FILE
+            with open(DATA_FILE, "w") as f:
+                json.dump(reset_data, f)
+
+            # 🔥 CLEAR SESSION
+            st.session_state.clear()
+
+            st.success("💀 FULL RESET DONE")
+            st.warning("🔄 Reloading App...")
+
+            st.rerun()
+
+        else:
+            st.error("❌ Wrong Password")
+            
