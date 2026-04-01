@@ -36,8 +36,8 @@ def load():
         "dream": "",
         "history": {},
         "reasons": {},
-        "start_date": str(date.today())
-        "badges": []
+        "start_date": str(date.today()),
+        "badges": [],
     }
     if not os.path.exists(DATA_FILE):
         return default
