@@ -17,7 +17,7 @@ if not st.session_state.login:
     if st.button("LOGIN"):
         if user == "hari" and pwd == "9442176514":
             st.session_state.login = True
-            st.success("Welcome 😈")
+            st.success("Login Success 😈")
         else:
             st.error("Wrong credentials")
     st.stop()
@@ -28,11 +28,12 @@ DATA_FILE = "data.json"
 def load():
     default = {
         "points": 0,
+        "xp": 0,
         "streak": 0,
         "last": "",
-        "xp": 0,
         "avatar": "😎",
         "name": "Player",
+        "dream": "",
         "history": {},
         "reasons": {},
         "start_date": str(date.today())
@@ -52,9 +53,10 @@ data = load()
 today = date.today()
 today_str = str(today)
 
-# ---------- LEVEL SYSTEM (365 DAYS → LEVEL 100) ----------
+# ---------- LEVEL ----------
 days_passed = (today - datetime.strptime(data["start_date"], "%Y-%m-%d").date()).days
 level = min(100, int((days_passed / 365) * 100))
+remaining_days = max(0, 365 - days_passed)
 
 # ---------- UI STYLE ----------
 st.markdown("""
@@ -65,9 +67,9 @@ body {background:linear-gradient(135deg,#0f172a,#1e293b);color:white;}
     background:rgba(255,255,255,0.08);
     padding:20px;
     border-radius:20px;
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(12px);
     margin-bottom:15px;
-    animation:fade 0.5s;
+    animation:fade 0.6s;
 }
 
 @keyframes fade {
@@ -77,19 +79,18 @@ body {background:linear-gradient(135deg,#0f172a,#1e293b);color:white;}
 
 @keyframes float {
     0%{transform:translateY(0)}
-    50%{transform:translateY(-10px)}
+    50%{transform:translateY(-12px)}
     100%{transform:translateY(0)}
-}
-
-@keyframes slide {
-    from{opacity:0;transform:translateX(-30px);}
-    to{opacity:1;}
 }
 
 .stButton button {
     background:linear-gradient(45deg,#6366f1,#8b5cf6);
     color:white;
     border-radius:10px;
+    transition:0.3s;
+}
+.stButton button:hover {
+    transform:scale(1.05);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -102,14 +103,18 @@ choice = st.sidebar.radio("Navigation", menu)
 weekday = today.strftime("%A")
 
 task_groups = {
-    "Morning": ["Wake 5:30","Brush","Bath"],
-    "Learning": ["Reading","Python"],
-    "Health": ["Water 2L","No Junk"],
+    "Morning": ["Wake 5:30","Brush","Bath","🙏🏻 Prayer","Washing"],
+    "Learning": ["Python (30min)","English (15min)","Reading (1hr)"],
+    "Health": ["Water 2L 🌊","No Junk Food 🌮"],
     "Control": ["MA001","PN002"],
-    "Workout": ["Walking","Exercise"],
-    "Limited Control": ["Instagram (20 min)","YouTube (20 min)"],
-    "Weekend": ["Movie (Saturday)","Oil Bath (Sunday)"]  # ALWAYS SHOW
+    "Limited Control": ["Instagram (20min)","YouTube (20min)"]
 }
+
+if weekday == "Saturday":
+    task_groups["Weekend"] = ["Movie 🎬"]
+
+if weekday == "Sunday":
+    task_groups["Weekend"] = ["Oil Bath 🛁"]
 
 # ---------- DASHBOARD ----------
 if choice == "🏠 Dashboard":
@@ -121,13 +126,9 @@ if choice == "🏠 Dashboard":
     <h1 style='text-align:center;font-size:70px;animation:float 3s infinite;'>😎</h1>
     <h2 style='text-align:center;'>{data['name']}</h2>
     <h3 style='text-align:center;'>Level {level}/100</h3>
+    <p style='text-align:center;'>🎯 Remaining Days: {remaining_days}</p>
     </div>
     """, unsafe_allow_html=True)
-
-    # Daily circle graph
-    if today_str in data["history"]:
-        score = data["history"][today_str]
-        st.plotly_chart(px.pie(values=[score,100-score],names=["Done","Remaining"]))
 
 # ---------- MISSIONS ----------
 elif choice == "🎮 Missions":
@@ -136,8 +137,8 @@ elif choice == "🎮 Missions":
 
     done=0
     total=0
-    completed=[]
     missed=[]
+    completed=[]
 
     for g,tasks in task_groups.items():
         st.subheader(g)
@@ -151,6 +152,7 @@ elif choice == "🎮 Missions":
 
     score=int((done/total)*100)
     st.progress(score/100)
+    st.write(f"Score: {score}%")
 
     reasons_today={}
     if missed:
@@ -163,7 +165,7 @@ elif choice == "🎮 Missions":
     if st.button("SAVE"):
         data["history"][today_str]=score
         data["points"]+=score
-        data["xp"]+=score  # ADD XP SYSTEM
+        data["xp"]+=score
 
         data["reasons"][today_str]={
             "time":datetime.now().strftime("%H:%M"),
@@ -171,10 +173,12 @@ elif choice == "🎮 Missions":
         }
 
         save(data)
-        st.success("Saved 😈")
+        st.success(f"Successfully Saved +{score} Points 🔥")
 
 # ---------- STATS ----------
 elif choice == "📊 Stats":
+
+    st.title("📊 Stats")
 
     history=data.get("history",{})
 
@@ -182,43 +186,40 @@ elif choice == "📊 Stats":
         dates=list(history.keys())
         scores=list(history.values())
 
-        st.plotly_chart(px.line(x=dates,y=scores,title="Performance"))
+        st.plotly_chart(px.line(x=dates,y=scores,title="📈 Growth"))
 
-        # DAILY CIRCLE (TASK BASED)
         today_score = history.get(today_str,0)
-        st.subheader("Daily Task Circle")
-        st.plotly_chart(px.pie(values=[today_score,100-today_score],names=["Done","Missed"]))
 
-        # YEARLY PROGRESS (365 BASE)
-        yearly = [s for s in scores]
-        st.subheader("Year Circle (365 Days)")
-        st.plotly_chart(px.pie(values=yearly,names=dates,hole=0.5))
+        st.subheader("Daily Performance")
+        st.plotly_chart(px.pie(
+            values=[today_score,100-today_score],
+            names=["Completed","Pending"]
+        ))
 
 # ---------- HISTORY ----------
 elif choice == "📜 History":
 
     for d,s in data["history"].items():
-        st.markdown(f"<div class='card' style='animation:slide 0.5s'>{d} - Score: {s}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='card'>{d} - Score: {s}</div>",unsafe_allow_html=True)
 
         if d in data["reasons"]:
             r=data["reasons"][d]
             st.write("Time:",r["time"])
 
             for t,rs in r["tasks"].items():
-                st.write(t,"→",rs)
+                st.write(f"{t} → {rs}")
 
 # ---------- REPORT ----------
 elif choice == "📄 Report":
 
-    st.title("📄 Daily Report")
+    st.title("📄 📊 Daily Report 😈")
 
     if today_str in data["history"]:
         score=data["history"][today_str]
         reasons=data["reasons"].get(today_str,{})
 
         report=f"""
-🔥 LIFE GAME REPORT 😈
-
+Name: {data['name']}
 Date: {today_str}
 Level: {level}
 Points: {data['points']}
@@ -233,35 +234,38 @@ Score: {score}
                 report+=f"{t} → {r}\n"
 
         st.text_area("Report",report,height=300)
-        st.download_button("Download",report,f"report_{today_str}.txt")
+        st.download_button("Download Report",report,f"report_{today_str}.txt")
 
 # ---------- PROFILE ----------
 elif choice == "🧑 Profile":
 
-    st.title("🧑🏻‍🦱 Profile")
+    st.title("🧑 Profile")
 
     name=st.text_input("Name",value=data["name"])
     avatar=st.selectbox("Avatar",["😎","🔥","👑","💪"])
+    dream=st.text_input("Dream",value=data.get("dream",""))
 
     st.markdown(f"### Preview: {avatar} {name}")
 
     if st.button("SAVE"):
         data["name"]=name
         data["avatar"]=avatar
+        data["dream"]=dream
         save(data)
+        st.success("Profile Saved ✅")
 
 # ---------- SETTINGS ----------
 elif choice == "⚙️ Settings":
 
-    st.markdown("<div class='card' style='animation:fade 1s'>⚙️ Settings Panel</div>",unsafe_allow_html=True)
+    st.markdown("<div class='card'>⚙️ Settings Panel</div>",unsafe_allow_html=True)
 
     pwd=st.text_input("Password",type="password")
 
     if st.button("RESET"):
         if pwd=="h1a2r3i4s5h6":
             save({
-                "points":0,"streak":0,"last":"",
-                "xp":0,"avatar":"😎","name":"Player",
+                "points":0,"xp":0,"streak":0,"last":"",
+                "avatar":"😎","name":"Player","dream":"",
                 "history":{},"reasons":{},
                 "start_date":str(date.today())
             })
