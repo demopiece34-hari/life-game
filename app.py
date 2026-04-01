@@ -37,7 +37,6 @@ def load():
         "history": {},
         "reasons": {},
         "start_date": str(date.today()),
-        "badges": [],
     }
     if not os.path.exists(DATA_FILE):
         return default
@@ -126,7 +125,6 @@ if choice == "🏠 Dashboard":
     <div class='card'>
     <h1 style='text-align:center;font-size:70px;animation:float 3s infinite;'>😎</h1>
     <h2 style='text-align:center;'>{data['name']}</h2>
-    st.markdown(f"<h3 style='text-align:center;'>🔥 Streak: {data['streak']} days</h3>", unsafe_allow_html=True)
     <h3 style='text-align:center;'>Level {level}/100</h3>
     <p style='text-align:center;'>🎯 Remaining Days: {remaining_days}</p>
     </div>
@@ -190,33 +188,6 @@ elif choice == "🎮 Missions":
         data["history"][today_str]=score
         data["points"]+=score
         data["xp"]+=score
-    # ---------- STREAK ----------
-    last = data.get("last","")
-
-    if last:
-        last_date = datetime.strptime(last, "%Y-%m-%d").date()
-
-        if today == last_date + timedelta(days=1):
-            data["streak"] += 1
-        elif today != last_date:
-            data["streak"] = 1
-    else:
-        data["streak"] = 1
-
-    data["last"] = today_str
-
-    # ---------- BADGES ----------
-    if data["streak"] >= 3 and "🟢 Beginner" not in data["badges"]:
-        data["badges"].append("🟢 Beginner")
-
-    if data["streak"] >= 7 and "🔥 Consistent" not in data["badges"]:
-        data["badges"].append("🔥 Consistent")
-
-    if data["streak"] >= 30 and "👑 Discipline King" not in data["badges"]:
-        data["badges"].append("👑 Discipline King")
-
-    if data["xp"] >= 1000 and "😈 Elite" not in data["badges"]:
-        data["badges"].append("😈 Elite")
         data["reasons"][today_str]={
             "time":datetime.now().strftime("%H:%M"),
             "tasks":reasons_today
@@ -304,12 +275,6 @@ elif choice == "🧑 Profile":
         save(data)
         st.success("Profile Saved ✅")
         st.subheader("🏆 Badges")
-
-if data["badges"]:
-    for b in data["badges"]:
-        st.success(b)
-else:
-    st.info("No badges yet")
 
 # ---------- SETTINGS ----------
 elif choice == "⚙️ Settings":
