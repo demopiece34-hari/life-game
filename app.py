@@ -9,7 +9,7 @@ st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
 if "login" not in st.session_state:
     st.session_state.login = False
 
-def login_ui():
+if not st.session_state.login:
     st.title("🔐 Login")
     user = st.text_input("Username")
     pwd = st.text_input("Password", type="password")
@@ -20,9 +20,6 @@ def login_ui():
             st.success("Welcome 😈")
         else:
             st.error("Wrong credentials")
-
-if not st.session_state.login:
-    login_ui()
     st.stop()
 
 # ---------- DATA ----------
@@ -37,7 +34,6 @@ def load():
         "avatar": "😎",
         "name": "Player",
         "history": {},
-        "badges": [],
         "reasons": {},
         "start_date": str(date.today())
     }
@@ -56,10 +52,40 @@ data = load()
 today = date.today()
 today_str = str(today)
 
-# ---------- UI ----------
-st.markdown("<style>body{background:#0f172a;color:white}</style>", unsafe_allow_html=True)
+# ---------- UI STYLE ----------
+st.markdown("""
+<style>
+body {background:linear-gradient(135deg,#0f172a,#1e293b);color:white;}
 
-# ---------- NAV (ADDED REPORT OPTION) ----------
+.card {
+    background:rgba(255,255,255,0.08);
+    padding:20px;
+    border-radius:20px;
+    backdrop-filter:blur(10px);
+    margin-bottom:15px;
+    animation:fade 0.5s;
+}
+
+@keyframes fade {
+    from{opacity:0;transform:translateY(20px);}
+    to{opacity:1;}
+}
+
+@keyframes float {
+    0%{transform:translateY(0)}
+    50%{transform:translateY(-10px)}
+    100%{transform:translateY(0)}
+}
+
+.stButton button {
+    background:linear-gradient(45deg,#6366f1,#8b5cf6);
+    color:white;
+    border-radius:10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---------- NAV ----------
 menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","📜 History","📄 Report","🧑 Profile","⚙️ Settings"]
 choice = st.sidebar.radio("Navigation", menu)
 
@@ -73,19 +99,35 @@ weekday = today.strftime("%A")
 task_groups = {
     "Morning": ["Wake 5:30","Brush","Bath"],
     "Learning": ["Reading","Python"],
+    "Health": ["Water 2L","No Junk"],
+    "Control": ["MA001","PN002"],
     "Workout": ["Walking","Exercise"],
     "Limited Control": ["Instagram (20 min)","YouTube (20 min)"]
 }
 
 if weekday == "Sunday":
-    task_groups["Weekend"] = ["Oil Bath (Sunday Only)"]
+    task_groups["Weekend"] = ["Oil Bath"]
 
 if weekday == "Saturday":
-    task_groups["Weekend"] = task_groups.get("Weekend", []) + ["Movie (Saturday Only)"]
+    task_groups["Weekend"] = task_groups.get("Weekend", []) + ["Movie"]
 
 # ---------- DASHBOARD ----------
 if choice == "🏠 Dashboard":
-    st.title("🎯 LIFE GAME GOD MODE")
+
+    st.title("🎯 LIFE GAME")
+
+    st.markdown(f"""
+    <div class='card'>
+    <h1 style='text-align:center;font-size:70px;animation:float 3s infinite;'>😎</h1>
+    <h2 style='text-align:center;'>{data['name']}</h2>
+    <h3 style='text-align:center;'>Level {level}/100</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Daily circle graph
+    if today_str in data["history"]:
+        score = data["history"][today_str]
+        st.plotly_chart(px.pie(values=[score,100-score],names=["Done","Remaining"]))
 
 # ---------- MISSIONS ----------
 elif choice == "🎮 Missions":
@@ -101,20 +143,18 @@ elif choice == "🎮 Missions":
         st.subheader(g)
         for t in tasks:
             total+=1
-            key=f"{today_str}_{t}"
-            if st.checkbox(t,key=key):
-                completed.append(t)
+            if st.checkbox(t,key=f"{today_str}_{t}"):
                 done+=1
+                completed.append(t)
             else:
                 missed.append(t)
 
     score=int((done/total)*100)
     st.progress(score/100)
-    st.write("Score:",score)
 
     reasons_today={}
     if missed:
-        st.subheader("Missed Reason")
+        st.subheader("Missed Reasons")
         for t in missed:
             r=st.text_input(f"{t}")
             if r:
@@ -125,13 +165,12 @@ elif choice == "🎮 Missions":
         data["points"]+=score
 
         data["reasons"][today_str]={
-            "time":str(datetime.now().strftime("%H:%M")),
+            "time":datetime.now().strftime("%H:%M"),
             "tasks":reasons_today
         }
 
-        data["last"]=today_str
         save(data)
-        st.success("Saved")
+        st.success("Saved 😈")
 
 # ---------- STATS ----------
 elif choice == "📊 Stats":
@@ -142,7 +181,7 @@ elif choice == "📊 Stats":
         dates=list(history.keys())
         scores=list(history.values())
 
-        st.plotly_chart(px.line(x=dates,y=scores))
+        st.plotly_chart(px.line(x=dates,y=scores,title="Performance"))
 
         st.subheader("Daily Circle")
         st.plotly_chart(px.pie(values=scores,names=dates))
@@ -155,56 +194,49 @@ elif choice == "📜 History":
 
     for d,s in data["history"].items():
         st.write(d,"Score:",s)
+
         if d in data["reasons"]:
             r=data["reasons"][d]
             st.write("Time:",r["time"])
+
             for t,rs in r["tasks"].items():
                 st.write(t,"→",rs)
 
-# ---------- 🆕 REPORT SYSTEM ----------
+# ---------- REPORT ----------
 elif choice == "📄 Report":
 
     st.title("📄 Daily Report")
 
     if today_str in data["history"]:
-        score = data["history"][today_str]
-        reasons = data["reasons"].get(today_str, {})
+        score=data["history"][today_str]
+        reasons=data["reasons"].get(today_str,{})
 
-        report = f"""
-LIFE GAME DAILY REPORT 😈
-Date: {today_str}
-
-Score: {score}
-
-"""
+        report=f"DATE: {today_str}\nSCORE: {score}\n\n"
 
         if "tasks" in reasons:
-            report += "\nMissed Tasks Reasons:\n"
-            for t, r in reasons["tasks"].items():
-                report += f"- {t} → {r}\n"
+            report+="Missed:\n"
+            for t,r in reasons["tasks"].items():
+                report+=f"{t} → {r}\n"
 
-        st.text_area("Report Preview", report, height=300)
+        st.text_area("Report",report,height=300)
 
-        st.download_button(
-            label="⬇️ Download Report",
-            data=report,
-            file_name=f"report_{today_str}.txt",
-            mime="text/plain"
-        )
-    else:
-        st.info("No report for today")
+        st.download_button("Download",report,f"report_{today_str}.txt")
 
 # ---------- PROFILE ----------
 elif choice == "🧑 Profile":
 
     name=st.text_input("Name",value=data["name"])
+    avatar=st.selectbox("Avatar",["😎","🔥","👑","💪"])
 
     if st.button("SAVE"):
         data["name"]=name
+        data["avatar"]=avatar
         save(data)
 
 # ---------- SETTINGS ----------
 elif choice == "⚙️ Settings":
+
+    st.markdown("<div class='card'>⚙️ Settings Panel</div>",unsafe_allow_html=True)
 
     pwd=st.text_input("Password",type="password")
 
@@ -213,7 +245,7 @@ elif choice == "⚙️ Settings":
             save({
                 "points":0,"streak":0,"last":"",
                 "xp":0,"avatar":"😎","name":"Player",
-                "history":{},"badges":[],"reasons":{},
+                "history":{},"reasons":{},
                 "start_date":str(date.today())
             })
-            st.success("Reset")
+            st.success("Reset Done")
