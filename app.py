@@ -5,6 +5,26 @@ import plotly.express as px
 
 st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
 
+# ---------- LOGIN SYSTEM ----------
+if "login" not in st.session_state:
+    st.session_state.login = False
+
+def login_ui():
+    st.title("🔐 Login System")
+    user = st.text_input("Username")
+    pwd = st.text_input("Password", type="password")
+
+    if st.button("LOGIN"):
+        if user == "hari" and pwd == "1234":
+            st.session_state.login = True
+            st.success("Login Success 😈")
+        else:
+            st.error("Wrong credentials")
+
+if not st.session_state.login:
+    login_ui()
+    st.stop()
+
 # ---------- DATA ----------
 DATA_FILE = "data.json"
 
@@ -17,7 +37,8 @@ def load():
         "avatar": "😎",
         "name": "Player",
         "history": {},
-        "badges": []
+        "badges": [],
+        "reasons": {}
     }
     if not os.path.exists(DATA_FILE):
         return default
@@ -33,92 +54,23 @@ def save(d):
 data = load()
 today = str(date.today())
 
-# ---------- UI STYLE + ANIMATION ----------
-st.markdown("""
-<style>
-body {
-    background: linear-gradient(135deg,#0f172a,#1e293b);
-    color:#e2e8f0;
-}
+# ---------- SOUND EFFECT ----------
+def play_sound():
+    st.markdown("""
+    <audio autoplay>
+    <source src="https://www.soundjay.com/buttons/sounds/button-3.mp3" type="audio/mpeg">
+    </audio>
+    """, unsafe_allow_html=True)
 
-/* SIDEBAR */
-section[data-testid="stSidebar"] {
-    background:#020617;
-}
-
-/* CARD */
-.card {
-    background: rgba(255,255,255,0.05);
-    padding:20px;
-    border-radius:18px;
-    backdrop-filter: blur(10px);
-    border:1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    margin-bottom:15px;
-    animation: fadeInUp 0.6s ease;
-}
-
-.card:hover {
-    transform: translateY(-5px) scale(1.02);
-    transition: 0.3s;
-}
-
-/* BUTTON */
-.stButton button {
-    border-radius:12px;
-    background: linear-gradient(45deg,#6366f1,#8b5cf6);
-    color:white;
-    font-weight:600;
-}
-
-.stButton button:hover {
-    transform: scale(1.05);
-}
-
-/* CHECKBOX */
-.stCheckbox {
-    background: rgba(255,255,255,0.03);
-    padding:6px;
-    border-radius:10px;
-}
-
-/* PROGRESS */
-.stProgress > div > div {
-    background: linear-gradient(90deg,#22c55e,#4ade80);
-}
-
-/* BADGE */
-.badge {
-    display:inline-block;
-    padding:6px 12px;
-    border-radius:20px;
-    background:linear-gradient(45deg,#f59e0b,#ef4444);
-    color:white;
-    margin:5px;
-    animation: popIn 0.4s ease;
-}
-
-/* ANIMATIONS */
-@keyframes fadeInUp {
-    from {opacity:0; transform: translateY(20px);}
-    to {opacity:1; transform: translateY(0);}
-}
-
-@keyframes popIn {
-    0% {transform: scale(0.5); opacity:0;}
-    100% {transform: scale(1); opacity:1;}
-}
-
-@keyframes float {
-    0% {transform: translateY(0px);}
-    50% {transform: translateY(-10px);}
-    100% {transform: translateY(0px);}
-}
-</style>
-""", unsafe_allow_html=True)
+# ---------- UI STYLE ----------
+st.markdown("""<style>
+body {background: linear-gradient(135deg,#0f172a,#1e293b); color:#e2e8f0;}
+.card {background: rgba(255,255,255,0.05); padding:20px; border-radius:18px;}
+.badge {padding:5px 10px; border-radius:20px; background:red; color:white;}
+</style>""", unsafe_allow_html=True)
 
 # ---------- NAV ----------
-menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","🧑 Profile","⚙️ Settings"]
+menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","📜 History","🧑 Profile","⚙️ Settings"]
 choice = st.sidebar.radio("Navigation", menu)
 
 # ---------- SIDEBAR ----------
@@ -139,7 +91,11 @@ task_groups = {
     "Health": ["Water 2L","No Junk"],
     "Workout": ["Walking","Exercise","Kegel"],
     "Control": ["MA001","PN002"],
-    "Entertainment": ["YouTube","Instagram","Movie"],
+    "Limited Control": [
+        "Instagram (20 min only)",
+        "YouTube (20 min only)",
+        "Movie (Weekly Once)"
+    ],
     "Weekend": ["Oil Bath"]
 }
 
@@ -152,45 +108,7 @@ task_points = {
 
 # ---------- DASHBOARD ----------
 if choice == "🏠 Dashboard":
-
     st.title("🎯 LIFE GAME GOD MODE 😈")
-
-    # Avatar + Profile
-    st.markdown(f"""
-    <div class='card'>
-        <h1 style='text-align:center; font-size:60px; animation: float 3s infinite;'>
-        {data['avatar']}
-        </h1>
-        <h2 style='text-align:center;'>{data['name']}</h2>
-        <p style='text-align:center;'>Level: {level}</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Stats Cards
-    col1, col2, col3 = st.columns(3)
-
-    col1.markdown(f"<div class='card'>💯 Points<br><h2>{data['points']}</h2></div>", unsafe_allow_html=True)
-    col2.markdown(f"<div class='card'>🔥 Streak<br><h2>{data['streak']}</h2></div>", unsafe_allow_html=True)
-    col3.markdown(f"<div class='card'>⚡ XP<br><h2>{data['xp']}</h2></div>", unsafe_allow_html=True)
-
-    # XP Progress
-    st.markdown(f"""
-    <div class='card'>
-        Level Progress 🚀
-        <progress value="{xp_current}" max="100" style="width:100%"></progress>
-        <p>{xp_current}/100 XP</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Chart
-    history = data.get("history", {})
-    if history:
-        dates = list(history.keys())[-5:]
-        scores = [history[d] for d in dates]
-
-        fig = px.line(x=dates, y=scores, markers=True)
-        fig.update_layout(template="plotly_dark", transition_duration=800)
-        st.plotly_chart(fig, use_container_width=True)
 
 # ---------- MISSIONS ----------
 elif choice == "🎮 Missions":
@@ -200,26 +118,34 @@ elif choice == "🎮 Missions":
     done = 0
     total = 0
     completed_tasks = []
+    missed_tasks = []
 
     for group, tasks in task_groups.items():
-        st.markdown(f"### {group}")
-        cols = st.columns(3)
-
-        for i, t in enumerate(tasks):
+        st.subheader(group)
+        for t in tasks:
             total += 1
             key = f"{today}_{t}"
-            if cols[i % 3].checkbox(t, key=key):
+            if st.checkbox(t, key=key):
                 done += 1
                 completed_tasks.append(t)
+            else:
+                missed_tasks.append(t)
 
     score = int((done/total)*100)
     st.progress(score/100)
     st.write(f"🎯 Score: {score}")
 
-    if score == 100:
-        st.balloons()
-        st.snow()
+    # ---------- MISSED TASK REASON ----------
+    reasons_today = {}
 
+    if missed_tasks:
+        st.subheader("❗ Missed Task Reasons")
+        for t in missed_tasks:
+            reason = st.text_input(f"Why missed: {t}")
+            if reason:
+                reasons_today[t] = reason
+
+    # ---------- SAVE ----------
     if st.button("💾 SAVE"):
 
         earn = sum(task_points.get(t, 10) for t in completed_tasks)
@@ -228,6 +154,13 @@ elif choice == "🎮 Missions":
         data["points"] += earn
         data["history"][today] = score
 
+        # store reasons
+        data["reasons"][today] = {
+            "time": str(datetime.now().time()),
+            "tasks": reasons_today
+        }
+
+        # streak
         last = data.get("last", "")
         if last:
             last_date = datetime.strptime(last, "%Y-%m-%d").date()
@@ -240,16 +173,31 @@ elif choice == "🎮 Missions":
 
         data["last"] = today
 
-        if score == 100 and "🏆 PERFECT DAY" not in data["badges"]:
-            data["badges"].append("🏆 PERFECT DAY")
-
         save(data)
+        play_sound()
         st.success(f"🔥 +{earn} XP Saved!")
+
+# ---------- HISTORY ----------
+elif choice == "📜 History":
+
+    st.title("📜 History")
+
+    if data["history"]:
+        for d, score in data["history"].items():
+            st.markdown(f"### 📅 {d} - Score: {score}")
+
+            if d in data["reasons"]:
+                r = data["reasons"][d]
+                st.write(f"⏰ Time: {r['time']}")
+
+                for task, reason in r["tasks"].items():
+                    st.write(f"❌ {task} → {reason}")
+
+    else:
+        st.info("No history")
 
 # ---------- STATS ----------
 elif choice == "📊 Stats":
-
-    st.title("📊 Weekly Stats")
 
     history = data.get("history", {})
 
@@ -258,13 +206,10 @@ elif choice == "📊 Stats":
         scores = [history[d] for d in dates]
 
         fig = px.area(x=dates, y=scores)
-        fig.update_layout(template="plotly_dark", transition_duration=800)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig)
 
 # ---------- PROFILE ----------
 elif choice == "🧑 Profile":
-
-    st.title("🧑 Profile")
 
     name = st.text_input("Enter Name", value=data["name"])
     avatar = st.selectbox("Avatar", ["😎","🔥","👑","💪","🤖"])
@@ -275,25 +220,18 @@ elif choice == "🧑 Profile":
         save(data)
         st.success("Updated!")
 
-    st.subheader("🏆 Badges")
-
-    for b in data["badges"]:
-        st.markdown(f"<span class='badge'>{b}</span>", unsafe_allow_html=True)
-
 # ---------- SETTINGS ----------
 elif choice == "⚙️ Settings":
 
-    st.title("⚙️ Settings")
-
     password = st.text_input("Enter Password", type="password")
 
-    if st.button("RESET ALL DATA"):
+    if st.button("RESET"):
         if password == "h1a2r3i4s5h6":
             save({
                 "points":0,"streak":0,"last":"",
                 "xp":0,"avatar":"😎","name":"Player",
-                "history":{},"badges":[]
+                "history":{},"badges":[],"reasons":{}
             })
-            st.success("✅ RESET DONE")
+            st.success("Reset Done")
         else:
-            st.error("❌ Wrong Password")
+            st.error("Wrong Password")
