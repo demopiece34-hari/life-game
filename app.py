@@ -52,6 +52,10 @@ data = load()
 today = date.today()
 today_str = str(today)
 
+# ---------- LEVEL SYSTEM (365 DAYS → LEVEL 100) ----------
+days_passed = (today - datetime.strptime(data["start_date"], "%Y-%m-%d").date()).days
+level = min(100, int((days_passed / 365) * 100))
+
 # ---------- UI STYLE ----------
 st.markdown("""
 <style>
@@ -77,6 +81,11 @@ body {background:linear-gradient(135deg,#0f172a,#1e293b);color:white;}
     100%{transform:translateY(0)}
 }
 
+@keyframes slide {
+    from{opacity:0;transform:translateX(-30px);}
+    to{opacity:1;}
+}
+
 .stButton button {
     background:linear-gradient(45deg,#6366f1,#8b5cf6);
     color:white;
@@ -89,10 +98,6 @@ body {background:linear-gradient(135deg,#0f172a,#1e293b);color:white;}
 menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","📜 History","📄 Report","🧑 Profile","⚙️ Settings"]
 choice = st.sidebar.radio("Navigation", menu)
 
-# ---------- LEVEL ----------
-days_passed = (today - datetime.strptime(data["start_date"], "%Y-%m-%d").date()).days
-level = int((days_passed / 365) * 100)
-
 # ---------- TASKS ----------
 weekday = today.strftime("%A")
 
@@ -102,14 +107,9 @@ task_groups = {
     "Health": ["Water 2L","No Junk"],
     "Control": ["MA001","PN002"],
     "Workout": ["Walking","Exercise"],
-    "Limited Control": ["Instagram (20 min)","YouTube (20 min)"]
+    "Limited Control": ["Instagram (20 min)","YouTube (20 min)"],
+    "Weekend": ["Movie (Saturday)","Oil Bath (Sunday)"]  # ALWAYS SHOW
 }
-
-if weekday == "Sunday":
-    task_groups["Weekend"] = ["Oil Bath"]
-
-if weekday == "Saturday":
-    task_groups["Weekend"] = task_groups.get("Weekend", []) + ["Movie"]
 
 # ---------- DASHBOARD ----------
 if choice == "🏠 Dashboard":
@@ -163,6 +163,7 @@ elif choice == "🎮 Missions":
     if st.button("SAVE"):
         data["history"][today_str]=score
         data["points"]+=score
+        data["xp"]+=score  # ADD XP SYSTEM
 
         data["reasons"][today_str]={
             "time":datetime.now().strftime("%H:%M"),
@@ -183,17 +184,21 @@ elif choice == "📊 Stats":
 
         st.plotly_chart(px.line(x=dates,y=scores,title="Performance"))
 
-        st.subheader("Daily Circle")
-        st.plotly_chart(px.pie(values=scores,names=dates))
+        # DAILY CIRCLE (TASK BASED)
+        today_score = history.get(today_str,0)
+        st.subheader("Daily Task Circle")
+        st.plotly_chart(px.pie(values=[today_score,100-today_score],names=["Done","Missed"]))
 
-        st.subheader("Year Circle")
-        st.plotly_chart(px.pie(values=scores,names=dates,hole=0.5))
+        # YEARLY PROGRESS (365 BASE)
+        yearly = [s for s in scores]
+        st.subheader("Year Circle (365 Days)")
+        st.plotly_chart(px.pie(values=yearly,names=dates,hole=0.5))
 
 # ---------- HISTORY ----------
 elif choice == "📜 History":
 
     for d,s in data["history"].items():
-        st.write(d,"Score:",s)
+        st.markdown(f"<div class='card' style='animation:slide 0.5s'>{d} - Score: {s}</div>", unsafe_allow_html=True)
 
         if d in data["reasons"]:
             r=data["reasons"][d]
@@ -211,22 +216,34 @@ elif choice == "📄 Report":
         score=data["history"][today_str]
         reasons=data["reasons"].get(today_str,{})
 
-        report=f"DATE: {today_str}\nSCORE: {score}\n\n"
+        report=f"""
+🔥 LIFE GAME REPORT 😈
+
+Date: {today_str}
+Level: {level}
+Points: {data['points']}
+
+Score: {score}
+
+"""
 
         if "tasks" in reasons:
-            report+="Missed:\n"
+            report+="Missed Tasks:\n"
             for t,r in reasons["tasks"].items():
                 report+=f"{t} → {r}\n"
 
         st.text_area("Report",report,height=300)
-
         st.download_button("Download",report,f"report_{today_str}.txt")
 
 # ---------- PROFILE ----------
 elif choice == "🧑 Profile":
 
+    st.title("🧑🏻‍🦱 Profile")
+
     name=st.text_input("Name",value=data["name"])
     avatar=st.selectbox("Avatar",["😎","🔥","👑","💪"])
+
+    st.markdown(f"### Preview: {avatar} {name}")
 
     if st.button("SAVE"):
         data["name"]=name
@@ -236,7 +253,7 @@ elif choice == "🧑 Profile":
 # ---------- SETTINGS ----------
 elif choice == "⚙️ Settings":
 
-    st.markdown("<div class='card'>⚙️ Settings Panel</div>",unsafe_allow_html=True)
+    st.markdown("<div class='card' style='animation:fade 1s'>⚙️ Settings Panel</div>",unsafe_allow_html=True)
 
     pwd=st.text_input("Password",type="password")
 
