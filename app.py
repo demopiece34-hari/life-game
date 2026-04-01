@@ -2,140 +2,144 @@ import streamlit as st
 import json
 import os
 from datetime import date
+import plotly.graph_objects as go
 
 # ---------- CONFIG ----------
 st.set_page_config(page_title="Life Game 🎯", layout="wide")
 
+# ---------- CUSTOM CSS (GAMING UI) ----------
+st.markdown("""
+<style>
+body {
+    background-color: #0f172a;
+    color: white;
+}
+.big-title {
+    font-size: 40px;
+    font-weight: bold;
+    color: #22c55e;
+}
+.card {
+    padding: 15px;
+    border-radius: 15px;
+    background: #1e293b;
+    box-shadow: 0px 0px 10px #22c55e;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ---------- FILE ----------
 DATA_FILE = "data.json"
 
-# ---------- LOAD DATA ----------
-def load_data():
+# ---------- LOAD ----------
+def load():
     if not os.path.exists(DATA_FILE):
-        return {
-            "points": 0,
-            "streak": 0,
-            "last_date": "",
-            "history": {}
-        }
-    with open(DATA_FILE, "r") as f:
-        return json.load(f)
+        return {"points": 0, "streak": 0, "last": "", "xp": 0}
+    return json.load(open(DATA_FILE))
 
-def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f)
+def save(d):
+    json.dump(d, open(DATA_FILE, "w"))
 
-data = load_data()
-
-# ---------- TASK LIST ----------
-tasks = [
-    "Wake up 5:30", "Brush", "Bathing", "Prayer", "Washing",
-    "Reading 1hr", "English 30min", "Python 30min",
-    "Drink 2L Water", "No Junk Food",
-    "Walking 1hr", "Exercise 30min", "Kegel 15min",
-    "MA001", "PN002",
-    "YouTube 20min", "Instagram 10min", "Movie (Weekly)",
-    "Oil Bath"
-]
+data = load()
 
 today = str(date.today())
 
-# ---------- UI TITLE ----------
-st.title("🎯 Life Game Dashboard")
-st.markdown("### 🔥 Level Up Your Life!")
+# ---------- TASKS ----------
+tasks = [
+    "Wake 5:30","Brush","Bath","Prayer","Washing",
+    "Reading","English","Python",
+    "Water 2L","No Junk",
+    "Walking","Exercise","Kegel",
+    "MA001","PN002",
+    "YouTube","Instagram","Movie",
+    "Oil Bath"
+]
+
+# ---------- TITLE ----------
+st.markdown('<div class="big-title">🎯 LIFE GAME PRO</div>', unsafe_allow_html=True)
 
 # ---------- SIDEBAR ----------
-st.sidebar.header("🏆 Player Stats")
+st.sidebar.header("🏆 PLAYER")
 
-st.sidebar.write(f"💯 Total Points: {data['points']}")
-st.sidebar.write(f"🔥 Streak: {data['streak']} days")
+level = data["xp"] // 100
+st.sidebar.write(f"🎮 Level: {level}")
+st.sidebar.write(f"⚡ XP: {data['xp']}")
+st.sidebar.write(f"💯 Points: {data['points']}")
+st.sidebar.write(f"🔥 Streak: {data['streak']}")
 
-# ---------- DAILY TASKS ----------
-st.subheader("📋 Daily Missions")
-
-completed = 0
-total = len(tasks)
-
-task_status = {}
+# ---------- TASK UI ----------
+st.subheader("🎮 Daily Missions")
 
 cols = st.columns(3)
 
-for i, task in enumerate(tasks):
-    with cols[i % 3]:
-        checked = st.checkbox(task, key=task)
-        task_status[task] = checked
-        if checked:
-            completed += 1
+done = 0
+status = {}
 
-# ---------- PROGRESS ----------
-progress = completed / total
+for i, t in enumerate(tasks):
+    with cols[i % 3]:
+        c = st.checkbox(t)
+        status[t] = c
+        if c:
+            done += 1
+
+total = len(tasks)
+progress = done / total
 score = int(progress * 100)
 
-st.subheader("🎮 Progress")
+# ---------- CIRCULAR GRAPH ----------
+fig = go.Figure(go.Indicator(
+    mode="gauge+number",
+    value=score,
+    title={'text': "Completion %"},
+    gauge={
+        'axis': {'range': [0, 100]},
+        'bar': {'color': "#22c55e"}
+    }
+))
+
+st.plotly_chart(fig, use_container_width=True)
 
 st.progress(progress)
 
-st.markdown(f"### 🧿 Score: {score}/100")
-
-# ---------- GAME STATUS ----------
+# ---------- STATUS ----------
 if score == 100:
-    st.success("🚀 LEVEL UP! Perfect Day!")
+    st.success("🚀 LEVEL UP! PERFECT DAY!")
 elif score < 50:
-    st.error("❌ Game Over! Try Again!")
+    st.error("❌ GAME OVER!")
 
-# ---------- SAVE BUTTON ----------
-if st.button("💾 Save Progress"):
-    
-    # streak logic
-    if data["last_date"] != today:
-        if data["last_date"]:
-            data["streak"] += 1
-        else:
-            data["streak"] = 1
-    
-    data["last_date"] = today
+# ---------- SAVE ----------
+if st.button("💾 SAVE PROGRESS"):
 
-    # points
-    earned = completed * 10
-    data["points"] += earned
+    if data["last"] != today:
+        data["streak"] += 1
+    data["last"] = today
 
-    # history
-    data["history"][today] = {
-        "score": score,
-        "completed": completed
-    }
+    earn = done * 10
+    data["points"] += earn
+    data["xp"] += earn
 
-    save_data(data)
+    save(data)
 
-    st.success(f"✅ Saved! You earned {earned} points!")
+    st.success(f"🔥 +{earn} XP Earned!")
 
 # ---------- REWARDS ----------
 st.subheader("🎁 Rewards")
 
-rewards = []
-
 if data["points"] >= 100:
-    rewards.append("😴 Rest Day (Skip Exercise)")
+    st.success("😴 Rest Day Unlocked")
 if data["points"] >= 300:
-    rewards.append("🎉 Free Entertainment Day")
+    st.success("🎉 Fun Day Unlocked")
 if data["points"] >= 500:
-    rewards.append("📚 No Study Day")
+    st.success("📚 Skip Study Day")
 if data["points"] >= 1000:
-    rewards.append("🏖️ Full Relax Day")
-
-if rewards:
-    for r in rewards:
-        st.success(r)
-else:
-    st.info("Keep grinding to unlock rewards 🔥")
+    st.success("🏖️ Full Relax Day")
 
 # ---------- MOTIVATION ----------
 st.subheader("💡 Motivation")
 
 if score == 100:
-    st.write("🔥 You are unstoppable!")
+    st.write("🔥 YOU ARE UNSTOPPABLE")
 elif score > 70:
-    st.write("💪 Great job, keep pushing!")
+    st.write("💪 GREAT JOB")
 else:
-    st.write("⚡ You can do better tomorrow!")
-
+    st.write("⚡ TRY HARDER TOMORROW")
