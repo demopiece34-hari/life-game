@@ -33,10 +33,87 @@ def save(d):
 data = load()
 today = str(date.today())
 
-# ---------- UI STYLE ----------
+# ---------- UI STYLE + ANIMATION ----------
 st.markdown("""
 <style>
-body {background-color:#0f172a; color:white;}
+body {
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color:#e2e8f0;
+}
+
+/* SIDEBAR */
+section[data-testid="stSidebar"] {
+    background:#020617;
+}
+
+/* CARD */
+.card {
+    background: rgba(255,255,255,0.05);
+    padding:20px;
+    border-radius:18px;
+    backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    margin-bottom:15px;
+    animation: fadeInUp 0.6s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px) scale(1.02);
+    transition: 0.3s;
+}
+
+/* BUTTON */
+.stButton button {
+    border-radius:12px;
+    background: linear-gradient(45deg,#6366f1,#8b5cf6);
+    color:white;
+    font-weight:600;
+}
+
+.stButton button:hover {
+    transform: scale(1.05);
+}
+
+/* CHECKBOX */
+.stCheckbox {
+    background: rgba(255,255,255,0.03);
+    padding:6px;
+    border-radius:10px;
+}
+
+/* PROGRESS */
+.stProgress > div > div {
+    background: linear-gradient(90deg,#22c55e,#4ade80);
+}
+
+/* BADGE */
+.badge {
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:20px;
+    background:linear-gradient(45deg,#f59e0b,#ef4444);
+    color:white;
+    margin:5px;
+    animation: popIn 0.4s ease;
+}
+
+/* ANIMATIONS */
+@keyframes fadeInUp {
+    from {opacity:0; transform: translateY(20px);}
+    to {opacity:1; transform: translateY(0);}
+}
+
+@keyframes popIn {
+    0% {transform: scale(0.5); opacity:0;}
+    100% {transform: scale(1); opacity:1;}
+}
+
+@keyframes float {
+    0% {transform: translateY(0px);}
+    50% {transform: translateY(-10px);}
+    100% {transform: translateY(0px);}
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -66,7 +143,6 @@ task_groups = {
     "Weekend": ["Oil Bath"]
 }
 
-# Task XP weight
 task_points = {
     "Wake 5:30": 20,
     "Python": 25,
@@ -79,20 +155,42 @@ if choice == "🏠 Dashboard":
 
     st.title("🎯 LIFE GAME GOD MODE 😈")
 
+    # Avatar + Profile
     st.markdown(f"""
-    <h1 style='font-size:80px; text-align:center; animation: float 2s infinite;'>
-    {data['avatar']}
-    </h1>
-    <style>
-    @keyframes float {{
-        0% {{ transform: translateY(0px); }}
-        50% {{ transform: translateY(-20px); }}
-        100% {{ transform: translateY(0px); }}
-    }}
-    </style>
+    <div class='card'>
+        <h1 style='text-align:center; font-size:60px; animation: float 3s infinite;'>
+        {data['avatar']}
+        </h1>
+        <h2 style='text-align:center;'>{data['name']}</h2>
+        <p style='text-align:center;'>Level: {level}</p>
+    </div>
     """, unsafe_allow_html=True)
 
-    st.success("🔥 Stay Consistent!")
+    # Stats Cards
+    col1, col2, col3 = st.columns(3)
+
+    col1.markdown(f"<div class='card'>💯 Points<br><h2>{data['points']}</h2></div>", unsafe_allow_html=True)
+    col2.markdown(f"<div class='card'>🔥 Streak<br><h2>{data['streak']}</h2></div>", unsafe_allow_html=True)
+    col3.markdown(f"<div class='card'>⚡ XP<br><h2>{data['xp']}</h2></div>", unsafe_allow_html=True)
+
+    # XP Progress
+    st.markdown(f"""
+    <div class='card'>
+        Level Progress 🚀
+        <progress value="{xp_current}" max="100" style="width:100%"></progress>
+        <p>{xp_current}/100 XP</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Chart
+    history = data.get("history", {})
+    if history:
+        dates = list(history.keys())[-5:]
+        scores = [history[d] for d in dates]
+
+        fig = px.line(x=dates, y=scores, markers=True)
+        fig.update_layout(template="plotly_dark", transition_duration=800)
+        st.plotly_chart(fig, use_container_width=True)
 
 # ---------- MISSIONS ----------
 elif choice == "🎮 Missions":
@@ -104,64 +202,46 @@ elif choice == "🎮 Missions":
     completed_tasks = []
 
     for group, tasks in task_groups.items():
-        with st.expander(group):
-            for t in tasks:
-                total += 1
-                key = f"{today}_{t}"
-                if st.checkbox(t, key=key):
-                    done += 1
-                    completed_tasks.append(t)
+        st.markdown(f"### {group}")
+        cols = st.columns(3)
+
+        for i, t in enumerate(tasks):
+            total += 1
+            key = f"{today}_{t}"
+            if cols[i % 3].checkbox(t, key=key):
+                done += 1
+                completed_tasks.append(t)
 
     score = int((done/total)*100)
     st.progress(score/100)
     st.write(f"🎯 Score: {score}")
 
-    # ---------- FEEDBACK ----------
     if score == 100:
         st.balloons()
-        st.success("😈 GOD MODE PERFECT!")
-    elif score >= 70:
-        st.info("🔥 Good consistency!")
-    elif score >= 40:
-        st.warning("⚠️ Improve tomorrow!")
-    else:
-        st.error("💀 Focus bro!")
+        st.snow()
 
-    # ---------- SAVE ----------
     if st.button("💾 SAVE"):
 
-        # XP calculation
         earn = sum(task_points.get(t, 10) for t in completed_tasks)
 
         data["xp"] += earn
         data["points"] += earn
         data["history"][today] = score
 
-        # ---------- STREAK ----------
         last = data.get("last", "")
         if last:
             last_date = datetime.strptime(last, "%Y-%m-%d").date()
             if date.today() == last_date + timedelta(days=1):
                 data["streak"] += 1
-            elif date.today() != last_date:
+            else:
                 data["streak"] = 1
         else:
             data["streak"] = 1
 
         data["last"] = today
 
-        # ---------- BADGES ----------
         if score == 100 and "🏆 PERFECT DAY" not in data["badges"]:
             data["badges"].append("🏆 PERFECT DAY")
-
-        if score >= 70 and "🔥 CONSISTENT" not in data["badges"]:
-            data["badges"].append("🔥 CONSISTENT")
-
-        if data["streak"] >= 7 and "🔥 7 DAY STREAK" not in data["badges"]:
-            data["badges"].append("🔥 7 DAY STREAK")
-
-        if data["xp"] >= 1000 and "👑 ELITE" not in data["badges"]:
-            data["badges"].append("👑 ELITE")
 
         save(data)
         st.success(f"🔥 +{earn} XP Saved!")
@@ -177,17 +257,9 @@ elif choice == "📊 Stats":
         dates = list(history.keys())[-7:]
         scores = [history[d] for d in dates]
 
-        fig = px.area(x=dates, y=scores, title="Performance Trend")
+        fig = px.area(x=dates, y=scores)
+        fig.update_layout(template="plotly_dark", transition_duration=800)
         st.plotly_chart(fig, use_container_width=True)
-
-        avg = sum(scores) / len(scores)
-
-        if avg < 50:
-            st.error("⚠️ Low performance")
-        elif avg > 80:
-            st.success("🔥 Elite consistency!")
-    else:
-        st.info("No data")
 
 # ---------- PROFILE ----------
 elif choice == "🧑 Profile":
@@ -195,22 +267,18 @@ elif choice == "🧑 Profile":
     st.title("🧑 Profile")
 
     name = st.text_input("Enter Name", value=data["name"])
-
-    avatars = ["😎","🔥","👑","💪","🤖"]
-    selected = st.selectbox("Choose Avatar", avatars)
+    avatar = st.selectbox("Avatar", ["😎","🔥","👑","💪","🤖"])
 
     if st.button("SAVE PROFILE"):
-        data["avatar"] = selected
         data["name"] = name
+        data["avatar"] = avatar
         save(data)
         st.success("Updated!")
 
     st.subheader("🏆 Badges")
-    if data["badges"]:
-        for b in data["badges"]:
-            st.success(b)
-    else:
-        st.info("No badges yet")
+
+    for b in data["badges"]:
+        st.markdown(f"<span class='badge'>{b}</span>", unsafe_allow_html=True)
 
 # ---------- SETTINGS ----------
 elif choice == "⚙️ Settings":
@@ -221,17 +289,11 @@ elif choice == "⚙️ Settings":
 
     if st.button("RESET ALL DATA"):
         if password == "h1a2r3i4s5h6":
-            reset_data = {
-                "points": 0,
-                "streak": 0,
-                "last": "",
-                "xp": 0,
-                "avatar": "😎",
-                "name": "Player",
-                "history": {},
-                "badges": []
-            }
-            save(reset_data)
-            st.success("✅ FULL RESET DONE")
+            save({
+                "points":0,"streak":0,"last":"",
+                "xp":0,"avatar":"😎","name":"Player",
+                "history":{},"badges":[]
+            })
+            st.success("✅ RESET DONE")
         else:
             st.error("❌ Wrong Password")
