@@ -17,9 +17,9 @@ if not st.session_state.login:
     if st.button("LOGIN"):
         if user == "hari" and pwd == "9442176514":
             st.session_state.login = True
-            st.success("Login Success 😈")
+            st.success("Login Success ⛓️‍💥")
         else:
-            st.error("Wrong credentials")
+            st.error("Wrong credentials 🔗")
     st.stop()
 
 # ---------- DATA ----------
@@ -103,7 +103,7 @@ choice = st.sidebar.radio("Navigation", menu)
 weekday = today.strftime("%A")
 
 task_groups = {
-    "Morning": ["Wake 5:30","Brush","Bath","🙏🏻 Prayer","Washing"],
+    "Morning": ["Wake 5:30","Brush","Bath"," Prayer","Washing"],
     "Learning": ["Python (30min)","English (15min)","Reading (1hr)"],
     "Health": ["Water 2L 🌊","No Junk Food 🌮"],
     "Control": ["MA001","PN002"],
@@ -212,7 +212,7 @@ elif choice == "📜 History":
 # ---------- REPORT ----------
 elif choice == "📄 Report":
 
-    st.title("📄 📊 Daily Report 😈")
+    st.title("📄 📊 Daily Report 📈")
 
     if today_str in data["history"]:
         score=data["history"][today_str]
