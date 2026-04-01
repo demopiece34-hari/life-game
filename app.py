@@ -5,19 +5,19 @@ import plotly.express as px
 
 st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
 
-# ---------- LOGIN SYSTEM ----------
+# ---------- LOGIN ----------
 if "login" not in st.session_state:
     st.session_state.login = False
 
 def login_ui():
-    st.title("🔐 Login System")
+    st.title("🔐 Login")
     user = st.text_input("Username")
     pwd = st.text_input("Password", type="password")
 
     if st.button("LOGIN"):
         if user == "hari" and pwd == "9442176514":
             st.session_state.login = True
-            st.success("Login Success 😈")
+            st.success("Welcome 😈")
         else:
             st.error("Wrong credentials")
 
@@ -38,7 +38,8 @@ def load():
         "name": "Player",
         "history": {},
         "badges": [],
-        "reasons": {}
+        "reasons": {},
+        "start_date": str(date.today())
     }
     if not os.path.exists(DATA_FILE):
         return default
@@ -52,187 +53,167 @@ def save(d):
     json.dump(d, open(DATA_FILE, "w"))
 
 data = load()
-today = str(date.today())
-
-# ---------- SOUND ----------
-def play_sound():
-    st.markdown("""
-    <audio autoplay>
-    <source src="https://www.soundjay.com/buttons/sounds/button-3.mp3" type="audio/mpeg">
-    </audio>
-    """, unsafe_allow_html=True)
+today = date.today()
+today_str = str(today)
 
 # ---------- UI ----------
 st.markdown("<style>body{background:#0f172a;color:white}</style>", unsafe_allow_html=True)
 
-# ---------- NAV ----------
-menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","📜 History","🧑 Profile","⚙️ Settings"]
+# ---------- NAV (ADDED REPORT OPTION) ----------
+menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","📜 History","📄 Report","🧑 Profile","⚙️ Settings"]
 choice = st.sidebar.radio("Navigation", menu)
 
-# ---------- SIDEBAR ----------
-level = data["xp"] // 100
-xp_current = data["xp"] % 100
-
-st.sidebar.markdown(f"# {data['avatar']} {data['name']}")
-st.sidebar.progress(xp_current/100)
-st.sidebar.write(f"XP: {data['xp']}")
-st.sidebar.write(f"Streak: {data['streak']}")
+# ---------- LEVEL ----------
+days_passed = (today - datetime.strptime(data["start_date"], "%Y-%m-%d").date()).days
+level = int((days_passed / 365) * 100)
 
 # ---------- TASKS ----------
+weekday = today.strftime("%A")
+
 task_groups = {
-    "Morning": ["Wake 5:30","Brush","Bath","Prayer","Washing"],
-    "Learning": ["Reading","English","Python"],
-    "Health": ["Water 2L","No Junk"],
-    "Workout": ["Walking","Exercise","Kegel"],
-    "Control": ["MA001","PN002"],
-    "Limited Control": [
-        "Instagram (20 min only)",
-        "YouTube (20 min only)",
-        "Movie (Weekly Once)"
-    ],
-    "Weekend": ["Oil Bath"]
+    "Morning": ["Wake 5:30","Brush","Bath"],
+    "Learning": ["Reading","Python"],
+    "Workout": ["Walking","Exercise"],
+    "Limited Control": ["Instagram (20 min)","YouTube (20 min)"]
 }
 
-task_points = {
-    "Wake 5:30": 20,
-    "Python": 25,
-    "Exercise": 20,
-    "No Junk": 15
-}
+if weekday == "Sunday":
+    task_groups["Weekend"] = ["Oil Bath (Sunday Only)"]
+
+if weekday == "Saturday":
+    task_groups["Weekend"] = task_groups.get("Weekend", []) + ["Movie (Saturday Only)"]
 
 # ---------- DASHBOARD ----------
 if choice == "🏠 Dashboard":
-    st.title("🎯 LIFE GAME GOD MODE 😈")
+    st.title("🎯 LIFE GAME GOD MODE")
 
 # ---------- MISSIONS ----------
 elif choice == "🎮 Missions":
 
-    st.title("🎮 Daily Missions")
+    st.title("🎮 Missions")
 
-    done = 0
-    total = 0
-    completed_tasks = []
-    missed_tasks = []
+    done=0
+    total=0
+    completed=[]
+    missed=[]
 
-    for group, tasks in task_groups.items():
-        st.subheader(group)
+    for g,tasks in task_groups.items():
+        st.subheader(g)
         for t in tasks:
-            total += 1
-            key = f"{today}_{t}"
-            if st.checkbox(t, key=key):
-                done += 1
-                completed_tasks.append(t)
+            total+=1
+            key=f"{today_str}_{t}"
+            if st.checkbox(t,key=key):
+                completed.append(t)
+                done+=1
             else:
-                missed_tasks.append(t)
+                missed.append(t)
 
-    score = int((done/total)*100)
+    score=int((done/total)*100)
     st.progress(score/100)
-    st.write(f"🎯 Score: {score}")
+    st.write("Score:",score)
 
-    # ---------- MISSED TASK REASON (ONLY MISSED) ----------
-    reasons_today = {}
+    reasons_today={}
+    if missed:
+        st.subheader("Missed Reason")
+        for t in missed:
+            r=st.text_input(f"{t}")
+            if r:
+                reasons_today[t]=r
 
-    if missed_tasks:
-        st.subheader("❗ Missed Task Reasons")
-        for t in missed_tasks:
-            reason = st.text_input(f"{t} - Reason")
-            if reason:
-                reasons_today[t] = reason
+    if st.button("SAVE"):
+        data["history"][today_str]=score
+        data["points"]+=score
 
-    # ---------- SAVE ----------
-    if st.button("💾 SAVE"):
-
-        earn = sum(task_points.get(t, 10) for t in completed_tasks)
-
-        data["xp"] += earn
-        data["points"] += earn
-        data["history"][today] = score
-
-        data["reasons"][today] = {
-            "time": str(datetime.now().strftime("%H:%M:%S")),
-            "tasks": reasons_today
+        data["reasons"][today_str]={
+            "time":str(datetime.now().strftime("%H:%M")),
+            "tasks":reasons_today
         }
 
-        last = data.get("last", "")
-        if last:
-            last_date = datetime.strptime(last, "%Y-%m-%d").date()
-            if date.today() == last_date + timedelta(days=1):
-                data["streak"] += 1
-            else:
-                data["streak"] = 1
-        else:
-            data["streak"] = 1
-
-        data["last"] = today
-
+        data["last"]=today_str
         save(data)
-        play_sound()
-        st.success(f"🔥 +{earn} XP Saved!")
+        st.success("Saved")
 
 # ---------- STATS ----------
 elif choice == "📊 Stats":
 
-    st.title("📊 Stats")
-
-    history = data.get("history", {})
+    history=data.get("history",{})
 
     if history:
-        dates = list(history.keys())[-7:]
-        scores = [history[d] for d in dates]
+        dates=list(history.keys())
+        scores=list(history.values())
 
-        # Existing graph
-        fig = px.area(x=dates, y=scores, title="Performance")
-        st.plotly_chart(fig)
+        st.plotly_chart(px.line(x=dates,y=scores))
 
-        # ---------- NEW GROWTH GRAPH ----------
-        growth = []
-        total = 0
-        for s in scores:
-            total += s
-            growth.append(total)
+        st.subheader("Daily Circle")
+        st.plotly_chart(px.pie(values=scores,names=dates))
 
-        fig2 = px.line(x=dates, y=growth, title="📈 Growth")
-        st.plotly_chart(fig2)
+        st.subheader("Year Circle")
+        st.plotly_chart(px.pie(values=scores,names=dates,hole=0.5))
 
 # ---------- HISTORY ----------
 elif choice == "📜 History":
 
-    st.title("📜 History")
-
-    for d, score in data["history"].items():
-        st.write(f"{d} - Score: {score}")
-
+    for d,s in data["history"].items():
+        st.write(d,"Score:",s)
         if d in data["reasons"]:
-            r = data["reasons"][d]
-            st.write("Time:", r["time"])
+            r=data["reasons"][d]
+            st.write("Time:",r["time"])
+            for t,rs in r["tasks"].items():
+                st.write(t,"→",rs)
 
-            for t, reason in r["tasks"].items():
-                st.write(f"{t} → {reason}")
+# ---------- 🆕 REPORT SYSTEM ----------
+elif choice == "📄 Report":
+
+    st.title("📄 Daily Report")
+
+    if today_str in data["history"]:
+        score = data["history"][today_str]
+        reasons = data["reasons"].get(today_str, {})
+
+        report = f"""
+LIFE GAME DAILY REPORT 😈
+Date: {today_str}
+
+Score: {score}
+
+"""
+
+        if "tasks" in reasons:
+            report += "\nMissed Tasks Reasons:\n"
+            for t, r in reasons["tasks"].items():
+                report += f"- {t} → {r}\n"
+
+        st.text_area("Report Preview", report, height=300)
+
+        st.download_button(
+            label="⬇️ Download Report",
+            data=report,
+            file_name=f"report_{today_str}.txt",
+            mime="text/plain"
+        )
+    else:
+        st.info("No report for today")
 
 # ---------- PROFILE ----------
 elif choice == "🧑 Profile":
 
-    name = st.text_input("Name", value=data["name"])
-    avatar = st.selectbox("Avatar", ["😎","🔥","👑","💪","🤖"])
+    name=st.text_input("Name",value=data["name"])
 
     if st.button("SAVE"):
-        data["name"] = name
-        data["avatar"] = avatar
+        data["name"]=name
         save(data)
-        st.success("Updated")
 
 # ---------- SETTINGS ----------
 elif choice == "⚙️ Settings":
 
-    pwd = st.text_input("Password", type="password")
+    pwd=st.text_input("Password",type="password")
 
     if st.button("RESET"):
-        if pwd == "h1a2r3i4s5h6":
+        if pwd=="h1a2r3i4s5h6":
             save({
                 "points":0,"streak":0,"last":"",
                 "xp":0,"avatar":"😎","name":"Player",
-                "history":{},"badges":[],"reasons":{}
+                "history":{},"badges":[],"reasons":{},
+                "start_date":str(date.today())
             })
-            st.success("Reset Done")
-        else:
-            st.error("Wrong Password")
+            st.success("Reset")
