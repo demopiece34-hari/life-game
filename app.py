@@ -35,6 +35,7 @@ def load():
     "name": "Player",
     "dream": "",
     "history": {},
+    "badges": [],
     "reasons": {},
     "start_date": str(date.today()),
     "final_submitted": {},
@@ -557,6 +558,7 @@ elif choice == "⚙️ Settings":
                 "name": "Player",
                 "dream": "",
                 "history": {},
+                "badges": [],
                 "reasons": {},
                 "start_date": str(date.today()),
                 "locked_days": []
