@@ -197,8 +197,8 @@ st.progress(score / 100)
 st.write(f"Score: {score}%")
 
 score=int((done/total)*100)
-    st.progress(score/100)
-    st.write(f"Score: {score}%")
+st.progress(score/100)
+st.write(f"Score: {score}%")
 
     reasons_today={}
     if missed:
