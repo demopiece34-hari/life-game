@@ -196,7 +196,7 @@ score = int((done / total) * 100) if total else 0
 st.progress(score / 100)
 st.write(f"Score: {score}%")
 
-    score=int((done/total)*100)
+score=int((done/total)*100)
     st.progress(score/100)
     st.write(f"Score: {score}%")
 
