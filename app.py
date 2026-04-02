@@ -348,7 +348,10 @@ elif choice == "🎮 Missions":
 
             st.warning(f"⚠️ Missed Tasks: {len(missed)}")
             st.error(f"❌ -{penalty} XP (based on tasks)")
-      
+        # ❌ prevent negative XP
+        if data["xp"] < 0:
+            data["xp"] = 0
+            
         save(data)
 
         st.info(f"🔥 TOTAL XP: {data['xp']}")
@@ -399,7 +402,17 @@ elif choice == "📊 Stats":
     st.write(f"🔥 XP: {data['xp']} / {MAX_XP}")
 
     # progress bar
-    st.progress(min(data["xp"] / MAX_XP, 1.0))
+    MAX_XP = 10000
+
+    # ❌ prevent negative XP
+    data["xp"] = max(0, data["xp"])
+
+    # ✅ safe progress calculation
+    progress_value = data["xp"] / MAX_XP
+    progress_value = max(0.0, min(progress_value, 1.0))
+
+    st.write(f"🔥 XP: {data['xp']} / {MAX_XP}")
+    st.progress(progress_value)
 
     history=data.get("history",{})
 
