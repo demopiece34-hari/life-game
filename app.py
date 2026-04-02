@@ -1,8 +1,8 @@
 import streamlit as st
 import json, os
+import random
 from datetime import date, datetime, timedelta
 import plotly.express as px
-
 st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
 
 # ---------- LOGIN ----------
@@ -27,16 +27,18 @@ DATA_FILE = "data.json"
 
 def load():
     default = {
-        "points": 0,
-        "xp": 0,
-        "streak": 0,
-        "last": "",
-        "avatar": "😎",
-        "name": "Player",
-        "dream": "",
-        "history": {},
-        "reasons": {},
-        "start_date": str(date.today()),
+    "points": 0,
+    "xp": 0,
+    "streak": 0,
+    "last": "",
+    "avatar": "😎",
+    "name": "Player",
+    "dream": "",
+    "history": {},
+    "reasons": {},
+    "start_date": str(date.today()),
+    "final_submitted": {},
+    "locked_days": [],
     }
     if not os.path.exists(DATA_FILE):
         return default
@@ -52,6 +54,21 @@ def save(d):
 data = load()
 today = date.today()
 today_str = str(today)
+
+# ---------- STRONG CAPTCHA ----------
+if "captcha_q" not in st.session_state:
+    a = random.randint(10, 50)
+    b = random.randint(10, 50)
+    op = random.choice(["+", "-", "*"])
+    if op == "+":
+        ans = a + b
+    elif op == "-":
+        ans = a - b
+    else:
+        ans = a * b
+
+    st.session_state.captcha_q = f"{a} {op} {b}"
+    st.session_state.captcha_ans = str(ans)
 
 # ---------- LEVEL ----------
 days_passed = (today - datetime.strptime(data["start_date"], "%Y-%m-%d").date()).days
@@ -166,7 +183,8 @@ elif choice == "🎮 Missions":
         st.subheader(g)
         for t in tasks:
             total+=1
-            if st.checkbox(t,key=f"{today_str}_{t}"):
+            locked = today_str in data.get("locked_days", [])
+if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
                 done+=1
                 completed.append(t)
             else:
@@ -195,6 +213,37 @@ elif choice == "🎮 Missions":
 
         save(data)
         st.success(f"Successfully Saved +{score} Points 🔥")
+        
+st.markdown("---")
+st.subheader("🔒 Final Submit")
+
+locked = today_str in data.get("locked_days", [])
+
+if locked:
+    st.error("🔒 Today already FINAL SAVED! Editing disabled ❌")
+else:
+    st.write(f"🧠 Solve this CAPTCHA to FINAL SAVE: {st.session_state.captcha_q}")
+    captcha_input = st.text_input("Enter Answer")
+
+    if st.button("FINAL SAVE 💀"):
+
+        if captcha_input != st.session_state.captcha_ans:
+            st.error("❌ Wrong Answer! Try again 😈")
+        else:
+            # Final save
+            data["history"][today_str] = score
+            data["final_submitted"][today_str] = True
+            data["locked_days"].append(today_str)
+
+            save(data)
+
+            st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
+
+            # Reset captcha for next day
+            del st.session_state["captcha_q"]
+            del st.session_state["captcha_ans"]
+
+            st.rerun()
 
 # ---------- STATS ----------
 elif choice == "📊 Stats":
@@ -275,6 +324,13 @@ elif choice == "🧑 Profile":
         save(data)
         st.success("Profile Saved ✅")
         st.subheader("🏆 Badges")
+
+st.markdown("---")
+st.subheader("📅 Progress Info")
+
+st.write(f"🔥 Total Days Tracked: {len(data.get('history', {}))}")
+st.write(f"🔒 Locked Days: {len(data.get('locked_days', []))}")
+st.write(f"⏳ Remaining Days: {365 - (len(data.get('history', {})))}")
 
 # ---------- SETTINGS ----------
 elif choice == "⚙️ Settings":
