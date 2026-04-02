@@ -201,8 +201,8 @@ st.progress(score/100)
 st.write(f"Score: {score}%")
 
 reasons_today={}
-    if missed:
-        st.subheader("Missed Reasons")
+if missed:
+    st.subheader("Missed Reasons")
         for t in missed:
             r=st.text_input(f"{t}")
             if r:
