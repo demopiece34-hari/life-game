@@ -197,6 +197,26 @@ if weekday == "Saturday":
 if weekday == "Sunday":
     task_groups["Weekend"] = ["Oil Bath 🛁"]
 
+# ---------- TASK XP VALUES ----------
+task_xp = {
+    "Wake 5:30": 10,
+    "Brush": 5,
+    "Bath": 5,
+    "Prayer": 10,
+
+    "Walking (40min) 🚶": 20,
+    "Exercise (30min) 🏋️": 25,
+    "Kegel Exercise 🧠": 15,
+    "Breathing 🌬️": 10,
+
+    "Python": 20,
+    "English": 15,
+    "Reading": 15,
+
+    "Water 2L": 10,
+    "No Junk": 20
+}
+
 # ---------- NAVIGATION HANDLER (Corrected Order) ----------
 if choice == "🏠 Dashboard":
 
@@ -316,15 +336,19 @@ elif choice == "🎮 Missions":
             data["xp"] += 100
             data["points"] += 100
 
-        # ❌ PENALTY SYSTEM
-        if missed:
-            penalty = len(missed) * 5
+        # ❌ SMART PENALTY (task-based)
+        penalty = 0
+
+        for t in missed:
+            penalty += task_xp.get(t, 5)  # default 5
+
+        if penalty > 0:
             data["xp"] -= penalty
             data["points"] -= penalty
 
             st.warning(f"⚠️ Missed Tasks: {len(missed)}")
-            st.error(f"❌ -{penalty} XP Penalty")
-
+            st.error(f"❌ -{penalty} XP (based on tasks)")
+      
         save(data)
 
         st.info(f"🔥 TOTAL XP: {data['xp']}")
