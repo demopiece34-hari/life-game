@@ -160,11 +160,35 @@ choice = st.sidebar.radio("Navigation", menu)
 weekday = today.strftime("%A")
 
 task_groups = {
-    "Morning": ["Wake 5:30","Brush","Bath"," Prayer","Washing"],
-    "Learning": ["Python (30min)","English (15min)","Reading (1hr)"],
-    "Health": ["Water 2L 🌊","No Junk Food 🌮"],
-    "Control": ["MA001","PN002"],
-    "Limited Control": ["Instagram (20min)","YouTube (20min)"]
+    "Morning": ["Wake 5:30","Brush","Bath","Prayer","Washing"],
+
+    "Workout 💪": [
+        "Walking (40min) 🚶",
+        "Exercise (30min) 🏋️",
+        "Kegel Exercise 🧠",
+        "Breathing 🌬️"
+    ],
+
+    "Learning 📚": [
+        "Python (30min)",
+        "English (15min)",
+        "Reading (1hr)"
+    ],
+
+    "Health 🥗": [
+        "Water 2L 🌊",
+        "No Junk Food 🌮"
+    ],
+
+    "Control 🎯": [
+        "MA001",
+        "PN002"
+    ],
+
+    "Limited Control ⏳": [
+        "Instagram (20min)",
+        "YouTube (20min)"
+    ]
 }
 
 if weekday == "Saturday":
