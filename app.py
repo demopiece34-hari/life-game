@@ -54,6 +54,9 @@ def save(d):
 data = load()
 today = date.today()
 today_str = str(today)
+# ---------- XP DISPLAY ----------
+st.sidebar.markdown(f"🔥 XP: {data['xp']}")
+st.sidebar.markdown(f"💰 Points: {data['points']}")
 
 # ---------- STRONG CAPTCHA ----------
 if "captcha_q" not in st.session_state:
@@ -237,9 +240,18 @@ elif choice == "🎮 Missions":
 
     st.title("🎮 Missions")
 
-    done=0
-    total=0
-    missed=[]
+    done = 0
+    total = 0
+    missed = []
+
+    workout_tasks = [
+        "Walking (40min) 🚶",
+        "Exercise (30min) 🏋️",
+        "Kegel Exercise 🧠",
+        "Breathing 🌬️"
+    ]
+
+    workout_done = 0
     completed=[]
     
     # ---------- WORKOUT TASK LIST ----------
@@ -260,7 +272,6 @@ elif choice == "🎮 Missions":
 
             if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
                 done += 1
-
                 # 💪 workout track
                 if t in workout_tasks:
                     workout_done += 1
@@ -281,31 +292,49 @@ elif choice == "🎮 Missions":
             if r:
                 reasons_today[t]=r
 
+        
     if st.button("SAVE"):
-        data["history"][today_str]=score
-        data["points"] += score
-        data["xp"] += score
 
-        # 💪 WORKOUT BONUS
-        if workout_done == len(workout_tasks):
-            st.balloons()
-            st.success("💪 FULL WORKOUT COMPLETED!")
-            st.info("🔥 +50 XP Bonus")
-            data["xp"] += 50
-            data["points"] += 50
+    data["history"][today_str] = score
 
-        # 💯 FULL DAY BONUS
-        if score == 100:
-            st.balloons()
-            st.success("🏆 PERFECT DAY 100%!")
-            st.info("🚀 +100 XP BONUS")
-            data["xp"] += 100
-            data["points"] += 100
+    # ✅ BASE XP
+    data["points"] += score
+    data["xp"] += score
+
+    st.success(f"📈 Base XP +{score}")
+
+    # 💪 WORKOUT BONUS
+    if workout_done == len(workout_tasks):
+        st.balloons()
+        st.success("💪 FULL WORKOUT DONE!")
+        st.info("🔥 +50 XP BONUS")
+        data["xp"] += 50
+        data["points"] += 50
+
+    # 💯 FULL DAY BONUS
+    if score == 100:
+        st.balloons()
+        st.success("🏆 PERFECT DAY!")
+        st.info("🚀 +100 XP BONUS")
+        data["xp"] += 100
+        data["points"] += 100
+
+    # ❌ PENALTY SYSTEM
+    if missed:
+        penalty = len(missed) * 5
+        data["xp"] -= penalty
+        data["points"] -= penalty
+
+        st.warning(f"⚠️ Missed Tasks: {len(missed)}")
+        st.error(f"❌ -{penalty} XP Penalty")
+
+    save(data)
+
+    st.info(f"🔥 TOTAL XP: {data['xp']}")
         data["reasons"][today_str]={
             "time":datetime.now().strftime("%H:%M"),
             "tasks":reasons_today
-        }
-
+          }
         save(data)
         st.success(f"Successfully Saved +{score} Points 🔥")
         
@@ -421,6 +450,11 @@ elif choice == "🧑 Profile":
             st.write(f"🏅 {b}")
     else:
         st.write("No badges unlocked yet 🔒")
+
+    st.subheader("🔥 XP Progress")
+
+    st.write(f"Total XP: {data['xp']}")
+    st.progress(min(data["xp"] / 1000, 1.0))
 
     st.markdown("---")
     st.subheader("📅 Progress Info")
