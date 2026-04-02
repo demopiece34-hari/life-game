@@ -75,6 +75,17 @@ days_passed = (today - datetime.strptime(data["start_date"], "%Y-%m-%d").date())
 level = min(100, int((days_passed / 365) * 100))
 remaining_days = max(0, 365 - days_passed)
 
+# ---------- BADGE UNLOCK ----------
+new_badges = check_badges()
+
+if new_badges:
+    save(data)
+
+    for icon, name, reward in new_badges:
+        st.balloons()
+        st.success(f"🎉 {icon} {name} UNLOCKED!")
+        st.info(f"💰 Reward: +{reward} XP & Points 🔥")
+
 # ---------- UI STYLE ----------
 st.markdown("""
 <style>
@@ -112,8 +123,37 @@ body {background:linear-gradient(135deg,#0f172a,#1e293b);color:white;}
 </style>
 """, unsafe_allow_html=True)
 
+# ---------- BADGES SYSTEM ----------
+BADGE_RULES = {
+    10: ("🪵", "Marakattai", 50),
+    20: ("🥈", "Silver", 100),
+    30: ("🥈", "Silver II", 150),
+    40: ("💎", "Platinum", 200),
+    50: ("💎", "Platinum II", 250),
+    60: ("🔷", "Diamond", 300),
+    70: ("👑", "Master", 400),
+    80: ("🧠", "Elite", 500),
+    90: ("⚡", "Elite Master", 700),
+    100: ("🔥", "GOD MODE", 1000)
+}
+
+def check_badges():
+    unlocked = []
+
+    for lvl, (icon, name, reward) in BADGE_RULES.items():
+        if level >= lvl and name not in data["badges"]:
+
+            data["badges"].append(name)
+
+            data["xp"] += reward
+            data["points"] += reward
+
+            unlocked.append((icon, name, reward))
+
+    return unlocked
+
 # ---------- NAV ----------
-menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","📜 History","📄 Report","🧑 Profile","⚙️ Settings"]
+menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","📜 History","📄 Report","🧑 Profile","🏆 Badges","⚙️ Settings"]
 choice = st.sidebar.radio("Navigation", menu)
 
 # ---------- TASKS ----------
@@ -320,6 +360,13 @@ elif choice == "🧑 Profile":
         data["dream"]=dream
         save(data)
         st.success("Profile Saved ✅")
+    st.subheader("🏆 Your Badges")
+
+    if data["badges"]:
+        for b in data["badges"]:
+            st.write(f"🏅 {b}")
+    else:
+        st.write("No badges unlocked yet 🔒")
         st.subheader("🏆 Badges")
 
     st.markdown("---")
@@ -328,7 +375,34 @@ elif choice == "🧑 Profile":
     st.write(f"🔥 Total Days Tracked: {len(data.get('history', {}))}")
     st.write(f"🔒 Locked Days: {len(data.get('locked_days', []))}")
     st.write(f"⏳ Remaining Days: {365 - (len(data.get('history', {})))}")
+    
+elif choice == "🏆 Badges":
 
+    st.title("🏆 Your Badges")
+
+    if not data["badges"]:
+        st.warning("🔒 All badges are LOCKED. Level up to unlock!")
+
+    for lvl, (icon, name, reward) in BADGE_RULES.items():
+
+        if name in data["badges"]:
+            st.markdown(f"""
+            <div class='card'>
+            <h2>{icon} {name} (Level {lvl})</h2>
+            <p style='color:lightgreen;'>UNLOCKED ✅</p>
+            <p>🎁 Reward Earned: +{reward}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+            <div class='card'>
+            <h2>🔒 Locked Badge</h2>
+            <p>Unlock at Level {lvl}</p>
+            <p>🎁 Reward: +{reward}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
 elif choice == "⚙️ Settings":
 
     st.markdown("<div class='card'>⚙️ Settings Panel</div>", unsafe_allow_html=True)
