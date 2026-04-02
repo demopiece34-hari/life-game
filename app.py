@@ -179,16 +179,22 @@ elif choice == "🎮 Missions":
     missed=[]
     completed=[]
 
-    for g,tasks in task_groups.items():
-        st.subheader(g)
-        for t in tasks:
-            total+=1
-            locked = today_str in data.get("locked_days", [])
-if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
-                done+=1
-                completed.append(t)
-            else:
-                missed.append(t)
+    for g, tasks in task_groups.items():
+    st.subheader(g)
+    for t in tasks:
+        total += 1
+        locked = today_str in data.get("locked_days", [])
+
+        if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
+            done += 1
+            completed.append(t)
+        else:
+            missed.append(t)
+
+# Score calculation safe a irukka
+score = int((done / total) * 100) if total else 0
+st.progress(score / 100)
+st.write(f"Score: {score}%")
 
     score=int((done/total)*100)
     st.progress(score/100)
