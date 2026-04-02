@@ -376,7 +376,6 @@ elif choice == "📊 Stats":
 
     # progress bar
     st.progress(min(data["xp"] / MAX_XP, 1.0))
-    st.title("📊 Stats")
 
     history=data.get("history",{})
 
