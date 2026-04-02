@@ -203,22 +203,23 @@ st.write(f"Score: {score}%")
 reasons_today={}
 if missed:
     st.subheader("Missed Reasons")
-        for t in missed:
-            r=st.text_input(f"{t}")
-            if r:
-                reasons_today[t]=r
+    for t in missed:
+        r=st.text_input(f"{t}")
+        if r:
+            reasons_today[t]=r
 
-    if st.button("SAVE"):
-        data["history"][today_str]=score
-        data["points"]+=score
-        data["xp"]+=score
-        data["reasons"][today_str]={
-            "time":datetime.now().strftime("%H:%M"),
-            "tasks":reasons_today
-        }
+    
+if st.button("SAVE"):
+    data["history"][today_str]=score
+    data["points"]+=score
+    data["xp"]+=score
+    data["reasons"][today_str]={
+        "time":datetime.now().strftime("%H:%M"),
+        "tasks":reasons_today
+    }
 
-        save(data)
-        st.success(f"Successfully Saved +{score} Points 🔥")
+    save(data)
+    st.success(f"Successfully Saved +{score} Points 🔥")
         
 st.markdown("---")
 st.subheader("🔒 Final Submit")
