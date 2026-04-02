@@ -133,14 +133,14 @@ if weekday == "Saturday":
 if weekday == "Sunday":
     task_groups["Weekend"] = ["Oil Bath 🛁"]
 
-# ---------- DASHBOARD ----------
+# ---------- NAVIGATION HANDLER (Corrected Order) ----------
 if choice == "🏠 Dashboard":
 
     st.title("🎯 LIFE GAME")
 
     st.markdown(f"""
     <div class='card'>
-    <h1 style='text-align:center;font-size:70px;animation:float 3s infinite;'>😎</h1>
+    <h1 style='text-align:center;font-size:70px;animation:float 3s infinite;'>{data['avatar']}</h1>
     <h2 style='text-align:center;'>{data['name']}</h2>
     <h3 style='text-align:center;'>Level {level}/100</h3>
     <p style='text-align:center;'>🎯 Remaining Days: {remaining_days}</p>
@@ -168,8 +168,7 @@ if choice == "🏠 Dashboard":
         📅 {current_day} | {current_date}
     </div>
     """, unsafe_allow_html=True)
-    
-# ---------- MISSIONS ----------
+
 elif choice == "🎮 Missions":
 
     st.title("🎮 Missions")
@@ -191,36 +190,191 @@ elif choice == "🎮 Missions":
             else:
                 missed.append(t)
 
-# Score calculation safe a irukka
-score = int((done / total) * 100) if total else 0
-st.progress(score / 100)
-st.write(f"Score: {score}%")
+    # Score calculation
+    score = int((done / total) * 100) if total else 0
+    st.progress(score / 100)
+    st.write(f"Score: {score}%")
 
-score=int((done/total)*100)
-st.progress(score/100)
-st.write(f"Score: {score}%")
+    reasons_today={}
+    if missed:
+        st.subheader("Missed Reasons")
+        for t in missed:
+            r=st.text_input(f"{t}")
+            if r:
+                reasons_today[t]=r
 
-reasons_today={}
-if missed:
-    st.subheader("Missed Reasons")
-    for t in missed:
-        r=st.text_input(f"{t}")
-        if r:
-            reasons_today[t]=r
+    if st.button("SAVE"):
+        data["history"][today_str]=score
+        data["points"]+=score
+        data["xp"]+=score
+        data["reasons"][today_str]={
+            "time":datetime.now().strftime("%H:%M"),
+            "tasks":reasons_today
+        }
 
-    
-if st.button("SAVE"):
-    data["history"][today_str]=score
-    data["points"]+=score
-    data["xp"]+=score
-    data["reasons"][today_str]={
-        "time":datetime.now().strftime("%H:%M"),
-        "tasks":reasons_today
-    }
-
-    save(data)
-    st.success(f"Successfully Saved +{score} Points 🔥")
+        save(data)
+        st.success(f"Successfully Saved +{score} Points 🔥")
         
+    st.markdown("---")
+    st.subheader("🔒 Final Submit")
+
+    locked = today_str in data.get("locked_days", [])
+
+    if locked:
+        st.error("🔒 Today already FINAL SAVED! Editing disabled ❌")
+    else:
+        st.write(f"🧠 Solve this CAPTCHA to FINAL SAVE: {st.session_state.captcha_q}")
+        captcha_input = st.text_input("Enter Answer")
+
+        if st.button("FINAL SAVE 💀"):
+
+            if captcha_input != st.session_state.captcha_ans:
+                st.error("❌ Wrong Answer! Try again 😈")
+            else:
+                # Final save
+                data["history"][today_str] = score
+                data["final_submitted"][today_str] = True
+                data["locked_days"].append(today_str)
+
+                save(data)
+
+                st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
+
+                # Reset captcha for next day
+                del st.session_state["captcha_q"]
+                del st.session_state["captcha_ans"]
+
+                st.rerun()
+
+elif choice == "📊 Stats":
+
+    st.title("📊 Stats")
+
+    history=data.get("history",{})
+
+    if history:
+        dates=list(history.keys())
+        scores=list(history.values())
+
+        st.plotly_chart(px.line(x=dates,y=scores,title="📈 Growth"))
+
+        today_score = history.get(today_str,0)
+
+        st.subheader("Daily Performance")
+        st.plotly_chart(px.pie(
+            values=[today_score,100-today_score],
+            names=["Completed","Pending"]
+        ))
+
+elif choice == "📜 History":
+
+    for d,s in data["history"].items():
+        st.markdown(f"<div class='card'>{d} - Score: {s}</div>",unsafe_allow_html=True)
+
+        if d in data["reasons"]:
+            r=data["reasons"][d]
+            st.write("Time:",r["time"])
+
+            for t,rs in r["tasks"].items():
+                st.write(f"{t} → {rs}")
+
+elif choice == "📄 Report":
+
+    st.title("📄 📊 Daily Report 📈")
+
+    if today_str in data["history"]:
+        score=data["history"][today_str]
+        reasons=data["reasons"].get(today_str,{})
+
+        report=f"""
+Name: {data['name']}
+Date: {today_str}
+Level: {level}
+Points: {data['points']}
+
+Score: {score}
+
+"""
+
+        if "tasks" in reasons:
+            report+="Missed Tasks:\n"
+            for t,r in reasons["tasks"].items():
+                report+=f"{t} → {r}\n"
+
+        st.text_area("Report",report,height=300)
+        st.download_button("Download Report",report,f"report_{today_str}.txt")
+
+elif choice == "🧑 Profile":
+
+    st.title("🧑 Profile")
+
+    name=st.text_input("Name",value=data["name"])
+    avatar=st.selectbox("Avatar",["😎","🔥","👑","💪"])
+    dream=st.text_input("Dream",value=data.get("dream",""))
+
+    st.markdown(f"### Preview: {avatar} {name}")
+
+    if st.button("SAVE"):
+        data["name"]=name
+        data["avatar"]=avatar
+        data["dream"]=dream
+        save(data)
+        st.success("Profile Saved ✅")
+        st.subheader("🏆 Badges")
+
+    st.markdown("---")
+    st.subheader("📅 Progress Info")
+
+    st.write(f"🔥 Total Days Tracked: {len(data.get('history', {}))}")
+    st.write(f"🔒 Locked Days: {len(data.get('locked_days', []))}")
+    st.write(f"⏳ Remaining Days: {365 - (len(data.get('history', {})))}")
+
+elif choice == "⚙️ Settings":
+
+    st.markdown("<div class='card'>⚙️ Settings Panel</div>", unsafe_allow_html=True)
+
+    pwd = st.text_input("Enter Password", type="password")
+
+    # ⚠️ CONFIRM CHECKBOX (NEW ADD)
+    confirm = st.checkbox("⚠️ Are you sure you want to reset ALL data?")
+
+    if st.button("RESET ALL DATA 💀"):
+
+        if not confirm:
+            st.warning("⚠️ Please confirm reset")
+        
+        elif pwd == "h1a2r3i4s5h6":
+
+            # 🔥 FULL RESET DATA
+            reset_data = {
+                "points": 0,
+                "xp": 0,
+                "streak": 0,
+                "last": "",
+                "avatar": "😎",
+                "name": "Player",
+                "dream": "",
+                "history": {},
+                "reasons": {},
+                "start_date": str(date.today()),
+                "locked_days": []
+            }
+
+            # 💾 SAVE CLEAN FILE
+            with open(DATA_FILE, "w") as f:
+                json.dump(reset_data, f)
+
+            # 🔥 CLEAR SESSION
+            st.session_state.clear()
+
+            st.success("💀 FULL RESET DONE")
+            st.warning("🔄 Reloading App...")
+
+            st.rerun()
+
+        else:
+            st.error("❌ Wrong Password")
+
 st.markdown("---")
 st.subheader("🔒 Final Submit")
 
