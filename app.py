@@ -200,7 +200,7 @@ score=int((done/total)*100)
 st.progress(score/100)
 st.write(f"Score: {score}%")
 
-    reasons_today={}
+reasons_today={}
     if missed:
         st.subheader("Missed Reasons")
         for t in missed:
