@@ -241,6 +241,16 @@ elif choice == "🎮 Missions":
     total=0
     missed=[]
     completed=[]
+    
+    # ---------- WORKOUT TASK LIST ----------
+    workout_tasks = [
+        "Walking (40min) 🚶",
+        "Exercise (30min) 🏋️",
+        "Kegel Exercise 🧠",
+        "Breathing 🌬️"
+    ]
+
+    workout_done = 0
 
     for g, tasks in task_groups.items():
         st.subheader(g)
@@ -250,6 +260,10 @@ elif choice == "🎮 Missions":
 
             if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
                 done += 1
+
+                # 💪 workout track
+                if t in workout_tasks:
+                    workout_done += 1
                 completed.append(t)
             else:
                 missed.append(t)
@@ -269,8 +283,24 @@ elif choice == "🎮 Missions":
 
     if st.button("SAVE"):
         data["history"][today_str]=score
-        data["points"]+=score
-        data["xp"]+=score
+        data["points"] += score
+        data["xp"] += score
+
+        # 💪 WORKOUT BONUS
+        if workout_done == len(workout_tasks):
+            st.balloons()
+            st.success("💪 FULL WORKOUT COMPLETED!")
+            st.info("🔥 +50 XP Bonus")
+            data["xp"] += 50
+            data["points"] += 50
+
+        # 💯 FULL DAY BONUS
+        if score == 100:
+            st.balloons()
+            st.success("🏆 PERFECT DAY 100%!")
+            st.info("🚀 +100 XP BONUS")
+            data["xp"] += 100
+            data["points"] += 100
         data["reasons"][today_str]={
             "time":datetime.now().strftime("%H:%M"),
             "tasks":reasons_today
