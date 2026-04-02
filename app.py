@@ -54,9 +54,6 @@ def save(d):
 data = load()
 today = date.today()
 today_str = str(today)
-# ---------- XP DISPLAY ----------
-st.sidebar.markdown(f"🔥 XP: {data['xp']}")
-st.sidebar.markdown(f"💰 Points: {data['points']}")
 
 # ---------- STRONG CAPTCHA ----------
 if "captcha_q" not in st.session_state:
@@ -370,7 +367,15 @@ elif choice == "🎮 Missions":
                 st.rerun()
 
 elif choice == "📊 Stats":
+    
+    st.title("📊 Stats")
 
+    # 🔥 XP DISPLAY FORMAT
+    MAX_XP = 10000
+    st.write(f"🔥 XP: {data['xp']} / {MAX_XP}")
+
+    # progress bar
+    st.progress(min(data["xp"] / MAX_XP, 1.0))
     st.title("📊 Stats")
 
     history=data.get("history",{})
