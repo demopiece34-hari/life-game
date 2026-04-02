@@ -75,6 +75,35 @@ days_passed = (today - datetime.strptime(data["start_date"], "%Y-%m-%d").date())
 level = min(100, int((days_passed / 365) * 100))
 remaining_days = max(0, 365 - days_passed)
 
+# ---------- BADGES SYSTEM ----------
+BADGE_RULES = {
+    10: ("🪵", "Marakattai", 50),
+    20: ("🥈", "Silver", 100),
+    30: ("🥈", "Silver II", 150),
+    40: ("💎", "Platinum", 200),
+    50: ("💎", "Platinum II", 250),
+    60: ("🔷", "Diamond", 300),
+    70: ("👑", "Master", 400),
+    80: ("🧠", "Elite", 500),
+    90: ("⚡", "Elite Master", 700),
+    100: ("🔥", "GOD MODE", 1000)
+}
+
+def check_badges():
+    unlocked = []
+
+    for lvl, (icon, name, reward) in BADGE_RULES.items():
+        if level >= lvl and name not in data["badges"]:
+
+            data["badges"].append(name)
+
+            data["xp"] += reward
+            data["points"] += reward
+
+            unlocked.append((icon, name, reward))
+
+    return unlocked
+
 # ---------- BADGE UNLOCK ----------
 new_badges = check_badges()
 
@@ -122,35 +151,6 @@ body {background:linear-gradient(135deg,#0f172a,#1e293b);color:white;}
 }
 </style>
 """, unsafe_allow_html=True)
-
-# ---------- BADGES SYSTEM ----------
-BADGE_RULES = {
-    10: ("🪵", "Marakattai", 50),
-    20: ("🥈", "Silver", 100),
-    30: ("🥈", "Silver II", 150),
-    40: ("💎", "Platinum", 200),
-    50: ("💎", "Platinum II", 250),
-    60: ("🔷", "Diamond", 300),
-    70: ("👑", "Master", 400),
-    80: ("🧠", "Elite", 500),
-    90: ("⚡", "Elite Master", 700),
-    100: ("🔥", "GOD MODE", 1000)
-}
-
-def check_badges():
-    unlocked = []
-
-    for lvl, (icon, name, reward) in BADGE_RULES.items():
-        if level >= lvl and name not in data["badges"]:
-
-            data["badges"].append(name)
-
-            data["xp"] += reward
-            data["points"] += reward
-
-            unlocked.append((icon, name, reward))
-
-    return unlocked
 
 # ---------- NAV ----------
 menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","📜 History","📄 Report","🧑 Profile","🏆 Badges","⚙️ Settings"]
