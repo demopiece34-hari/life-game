@@ -295,42 +295,42 @@ elif choice == "🎮 Missions":
         
     if st.button("SAVE"):
 
-    data["history"][today_str] = score
+        data["history"][today_str] = score
 
-    # ✅ BASE XP
-    data["points"] += score
-    data["xp"] += score
+        # ✅ BASE XP
+        data["points"] += score
+        data["xp"] += score
 
-    st.success(f"📈 Base XP +{score}")
+        st.success(f"📈 Base XP +{score}")
 
-    # 💪 WORKOUT BONUS
-    if workout_done == len(workout_tasks):
-        st.balloons()
-        st.success("💪 FULL WORKOUT DONE!")
-        st.info("🔥 +50 XP BONUS")
-        data["xp"] += 50
-        data["points"] += 50
+        # 💪 WORKOUT BONUS
+        if workout_done == len(workout_tasks):
+            st.balloons()
+            st.success("💪 FULL WORKOUT DONE!")
+            st.info("🔥 +50 XP BONUS")
+            data["xp"] += 50
+            data["points"] += 50
 
-    # 💯 FULL DAY BONUS
-    if score == 100:
-        st.balloons()
-        st.success("🏆 PERFECT DAY!")
-        st.info("🚀 +100 XP BONUS")
-        data["xp"] += 100
-        data["points"] += 100
+        # 💯 FULL DAY BONUS
+        if score == 100:
+            st.balloons()
+            st.success("🏆 PERFECT DAY!")
+            st.info("🚀 +100 XP BONUS")
+            data["xp"] += 100
+            data["points"] += 100
 
-    # ❌ PENALTY SYSTEM
-    if missed:
-        penalty = len(missed) * 5
-        data["xp"] -= penalty
-        data["points"] -= penalty
+        # ❌ PENALTY SYSTEM
+        if missed:
+            penalty = len(missed) * 5
+            data["xp"] -= penalty
+            data["points"] -= penalty
 
-        st.warning(f"⚠️ Missed Tasks: {len(missed)}")
-        st.error(f"❌ -{penalty} XP Penalty")
+            st.warning(f"⚠️ Missed Tasks: {len(missed)}")
+            st.error(f"❌ -{penalty} XP Penalty")
 
-    save(data)
+        save(data)
 
-    st.info(f"🔥 TOTAL XP: {data['xp']}")
+        st.info(f"🔥 TOTAL XP: {data['xp']}")
         data["reasons"][today_str]={
             "time":datetime.now().strftime("%H:%M"),
             "tasks":reasons_today
