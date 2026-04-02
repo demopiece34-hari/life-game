@@ -367,7 +367,6 @@ elif choice == "🧑 Profile":
             st.write(f"🏅 {b}")
     else:
         st.write("No badges unlocked yet 🔒")
-        st.subheader("🏆 Badges")
 
     st.markdown("---")
     st.subheader("📅 Progress Info")
