@@ -412,7 +412,6 @@ elif choice == "📊 Stats":
     progress_value = data["xp"] / MAX_XP
     progress_value = max(0.0, min(progress_value, 1.0))
 
-    st.write(f"🔥 XP: {data['xp']} / {MAX_XP}")
     st.progress(progress_value)
 
     history=data.get("history",{})
