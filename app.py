@@ -287,6 +287,8 @@ elif choice == "🎮 Missions":
     total = 0
     missed = []
 
+    locked = today_str in data.get("locked_days", [])
+    
     workout_tasks = [
         "Walking (40min) 🚶",
         "Exercise (30min) 🏋️",
