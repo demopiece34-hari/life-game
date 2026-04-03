@@ -26,23 +26,23 @@ if not st.session_state.login:
 DATA_FILE = "data.json"
 
 def load():
-    "default": {
-    "points": 0,
-    "xp": 0,
-    "ma001_last": "",
-    "ma001_strict": True,
-    "streak": 0,
-    "last": "",
-    "avatar": "😎",
-    "name": "Player",
-    "dream": "",
-    "history": {},
-    "badges": [],
-    "reasons": {},
-    "start_date": str(date.today()),
-    "final_submitted": {},
-    "locked_days": [],
-    }
+    default = {
+        "points": 0,
+        "xp": 0,
+        "ma001_last": "",
+        "ma001_strict": True,
+        "streak": 0,
+        "last": "",
+        "avatar": "😎",
+        "name": "Player",
+        "dream": "",
+        "history": {},
+        "badges": [],
+        "reasons": {},
+        "start_date": str(date.today()),
+        "final_submitted": {},
+        "locked_days": [],
+        }
     if not os.path.exists(DATA_FILE):
         return default
     data = json.load(open(DATA_FILE))
