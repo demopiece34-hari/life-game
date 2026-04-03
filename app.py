@@ -26,9 +26,11 @@ if not st.session_state.login:
 DATA_FILE = "data.json"
 
 def load():
-    default = {
+    "default": {
     "points": 0,
     "xp": 0,
+    "ma001_last": "",
+    "ma001_strict": True
     "streak": 0,
     "last": "",
     "avatar": "😎",
@@ -197,7 +199,20 @@ if weekday == "Saturday":
 
 if weekday == "Sunday":
     task_groups["Weekend"] = ["Oil Bath 🛁"]
+    
+# ---------- MA001 CONTROL ----------
+def is_ma001_allowed():
+    if days_passed < 30:
+        return False
 
+    last_done = data.get("ma001_last", "")
+
+    if last_done:
+        last_date = datetime.strptime(last_done, "%Y-%m-%d").date()
+        diff = (today - last_date).days
+        return diff >= 4
+    return True
+    
 # ---------- TASK XP VALUES ----------
 task_xp = {
     "Wake 5:30": 10,
@@ -288,8 +303,28 @@ elif choice == "🎮 Missions":
             total += 1
             locked = today_str in data.get("locked_days", [])
 
-            if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
-                done += 1
+            if not is_ma001_allowed():
+                st.warning("⚠️ First 30 days avoid. After that → 4 days once only")
+                
+            if t == "MA001":
+
+                allowed = is_ma001_allowed()
+
+                if not allowed:
+                    st.checkbox("MA001 ❌ (Blocked)", disabled=True)
+                    missed.append(t)
+                else:
+                    if st.checkbox("MA001", key=f"{today_str}_{t}"):
+                        done += 1
+                        data["ma001_last"] = today_str
+                else:
+                    missed.append(t)
+
+                else:
+                    if st.checkbox(t, key=f"{today_str}_{t}"):
+                        done += 1
+                else:
+                    missed.append(t)
                 # 💪 workout track
                 if t in workout_tasks:
                     workout_done += 1
@@ -352,6 +387,20 @@ elif choice == "🎮 Missions":
         # ❌ prevent negative XP
         if data["xp"] < 0:
             data["xp"] = 0
+
+        # ---------- MA001 BONUS / PENALTY ----------
+
+        if "MA001" not in missed:
+        # ✅ controlled usage
+            st.success("🧠 Self Control Maintained!")
+            data["xp"] += 30
+            data["points"] += 30
+
+        else:
+            # ❌ missed / wrong control
+            st.warning("⚠️ Control Missed!")
+            data["xp"] -= 30
+            data["points"] -= 30
             
         save(data)
 
@@ -551,6 +600,8 @@ elif choice == "⚙️ Settings":
             reset_data = {
                 "points": 0,
                 "xp": 0,
+                "ma001_last": "",
+                "ma001_strict": True
                 "streak": 0,
                 "last": "",
                 "avatar": "😎",
