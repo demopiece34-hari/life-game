@@ -550,7 +550,13 @@ elif choice == "🧑 Profile":
     st.subheader("🔥 XP Progress")
 
     st.write(f"Total XP: {data['xp']}")
-    st.progress(min(data["xp"] / 1000, 1.0))
+    xp = max(0, data["xp"])  # ❌ negative avoid
+    progress = xp / 1000
+
+    # ✅ clamp between 0 and 1
+    progress = max(0.0, min(progress, 1.0))
+
+    st.progress(progress)
 
     st.markdown("---")
     st.subheader("📅 Progress Info")
