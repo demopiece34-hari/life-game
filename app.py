@@ -378,71 +378,74 @@ elif choice == "🎮 Missions":
 
         if st.button("FINAL SAVE 💀"):
 
+            # ❌ Wrong captcha
             if captcha_input != st.session_state.captcha_ans:
                 st.error("❌ Wrong Answer! Try again 😈")
 
-        else:
-            final_score = st.session_state.get("temp_score", score)
-            final_missed = st.session_state.get("temp_missed", missed)
-
-            # ✅ save history
-            data["history"][today_str] = final_score
-
-            # ✅ XP
-            data["xp"] += final_score
-            data["points"] += final_score
-
-            # 💪 workout bonus
-            if workout_done == len(workout_tasks):
-                data["xp"] += 50
-                data["points"] += 50
-
-            # 💯 perfect day
-            if final_score == 100:
-                data["xp"] += 100
-                data["points"] += 100
-
-            # ❌ penalty
-            penalty = 0
-            for t in final_missed:
-                penalty += task_xp.get(t, 5)
-
-            data["xp"] -= penalty
-            data["points"] -= penalty
-
-            # 🧠 MA001
-            if "MA001" not in final_missed:
-                data["xp"] += 30
-                data["points"] += 30
+            # ✅ Correct captcha → FINAL SAVE
             else:
-                data["xp"] -= 30
-                data["points"] -= 30
+                final_score = st.session_state.get("temp_score", score)
+                final_missed = st.session_state.get("temp_missed", missed)
 
-            # 📝 reasons
-            data["reasons"][today_str] = {
-                "time": datetime.now().strftime("%H:%M"),
-                "tasks": reasons_today
-            }
+                # save history
+                data["history"][today_str] = final_score
 
-            # 🔒 lock
-            data["locked_days"].append(today_str)
+                # XP
+                data["xp"] += final_score
+                data["points"] += final_score
 
-            save(data)
+                # workout bonus
+                if workout_done == len(workout_tasks):
+                    data["xp"] += 50
+                    data["points"] += 50
 
-            st.success("🔥 FINAL SAVE DONE! Stats Updated ✅")
+                # perfect day
+                if final_score == 100:
+                    data["xp"] += 100
+                    data["points"] += 100
 
-            del st.session_state["captcha_q"]
-            del st.session_state["captcha_ans"]
+                # penalty
+                penalty = 0
+                for t in final_missed:
+                    penalty += task_xp.get(t, 5)
 
-            st.rerun()
+                data["xp"] -= penalty
+                data["points"] -= penalty
 
-            st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
+                # MA001
+                if "MA001" not in final_missed:
+                    data["xp"] += 30
+                    data["points"] += 30
+                else:
+                    data["xp"] -= 30
+                    data["points"] -= 30
 
-            # Reset captcha for next day
-            del st.session_state["captcha_q"]
-            del st.session_state["captcha_ans"]
+                # reasons
+                data["reasons"][today_str] = {
+                    "time": datetime.now().strftime("%H:%M"),
+                    "tasks": reasons_today
+                }
 
-            st.rerun()
+                # 🔒 lock day
+                data["locked_days"].append(today_str)
+
+                save(data)
+
+                st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
+
+                # reset captcha
+                del st.session_state["captcha_q"]
+                del st.session_state["captcha_ans"]
+
+                st.rerun()
+
+                st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
+
+                # Reset captcha for next day
+                del st.session_state["captcha_q"]
+                del st.session_state["captcha_ans"]
+
+                st.rerun()
 
 elif choice == "📊 Stats":
     
