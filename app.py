@@ -308,39 +308,39 @@ elif choice == "🎮 Missions":
     workout_done = 0
 
     for g, tasks in task_groups.items():
-    st.subheader(g)
+        st.subheader(g)
 
-    for t in tasks:
-        total += 1
+        for t in tasks:
+            total += 1
 
-        if t == "MA001":
+            if t == "MA001":
 
-            allowed = is_ma001_allowed()
+                allowed = is_ma001_allowed()
 
-            if not allowed:
-                st.warning("⚠️ First 30 days avoid. After that → 4 days once only")
-                st.checkbox("MA001 ❌ (Blocked)", disabled=True)
-                missed.append(t)
-
-            else:
-                if st.checkbox("MA001", key=f"{today_str}_{t}"):
-                    done += 1
-                    data["ma001_last"] = today_str
-                else:
+                if not allowed:
+                    st.warning("⚠️ First 30 days avoid. After that → 4 days once only")
+                    st.checkbox("MA001 ❌ (Blocked)", disabled=True)
                     missed.append(t)
 
-        else:
-            # ✅ normal tasks
-            if st.checkbox(t, key=f"{today_str}_{t}"):
-                done += 1
-
-                # 💪 workout tracking
-                if t in workout_tasks:
-                    workout_done += 1
-                    completed.append(t)
+                else:
+                    if st.checkbox("MA001", key=f"{today_str}_{t}"):
+                        done += 1
+                        data["ma001_last"] = today_str
+                    else:
+                        missed.append(t)
 
             else:
-                missed.append(t)
+                # ✅ normal tasks
+                if st.checkbox(t, key=f"{today_str}_{t}"):
+                    done += 1
+
+                    # 💪 workout tracking
+                    if t in workout_tasks:
+                        workout_done += 1
+                        completed.append(t)
+
+                else:
+                    missed.append(t)
 
     # Score calculation
     score = int((done / total) * 100) if total else 0
