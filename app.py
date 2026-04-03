@@ -312,22 +312,24 @@ elif choice == "🎮 Missions":
 
         for t in tasks:
             total += 1
-
+            
             if t == "MA001":
 
                 allowed = is_ma001_allowed()
 
-                if not allowed:
-                    st.warning("⚠️ First 30 days avoid. After that → 4 days once only")
-                    st.checkbox("MA001 ❌ (Blocked)", disabled=True)
-                    missed.append(t)
+                if days_passed < 30:
+                    st.warning("⚠️ First 30 days avoid (but you can track)")
 
                 else:
-                    if st.checkbox("MA001", key=f"{today_str}_{t}"):
-                        done += 1
+                    st.info("⏳ Allowed once every 4 days")
+
+                if st.checkbox("MA001", key=f"{today_str}_{t}"):
+                    done += 1
+
+                    if allowed:
                         data["ma001_last"] = today_str
-                    else:
-                        missed.append(t)
+                else:
+                    missed.append(t)
 
             else:
                 # ✅ normal tasks
@@ -355,73 +357,14 @@ elif choice == "🎮 Missions":
             if r:
                 reasons_today[t]=r
 
-        
-    if st.button("SAVE"):
+     if st.button("SAVE"):
 
-        data["history"][today_str] = score
+         st.success("✅ Progress Saved (Temporary)")
 
-        # ✅ BASE XP
-        data["points"] += score
-        data["xp"] += score
-
-        st.success(f"📈 Base XP +{score}")
-
-        # 💪 WORKOUT BONUS
-        if workout_done == len(workout_tasks):
-            st.balloons()
-            st.success("💪 FULL WORKOUT DONE!")
-            st.info("🔥 +50 XP BONUS")
-            data["xp"] += 50
-            data["points"] += 50
-
-        # 💯 FULL DAY BONUS
-        if score == 100:
-            st.balloons()
-            st.success("🏆 PERFECT DAY!")
-            st.info("🚀 +100 XP BONUS")
-            data["xp"] += 100
-            data["points"] += 100
-
-        # ❌ SMART PENALTY (task-based)
-        penalty = 0
-
-        for t in missed:
-            penalty += task_xp.get(t, 5)  # default 5
-
-        if penalty > 0:
-            data["xp"] -= penalty
-            data["points"] -= penalty
-
-            st.warning(f"⚠️ Missed Tasks: {len(missed)}")
-            st.error(f"❌ -{penalty} XP (based on tasks)")
-        # ❌ prevent negative XP
-        if data["xp"] < 0:
-            data["xp"] = 0
-
-        # ---------- MA001 BONUS / PENALTY ----------
-
-        if "MA001" not in missed:
-        # ✅ controlled usage
-            st.success("🧠 Self Control Maintained!")
-            data["xp"] += 30
-            data["points"] += 30
-
-        else:
-            # ❌ missed / wrong control
-            st.warning("⚠️ Control Missed!")
-            data["xp"] -= 30
-            data["points"] -= 30
-            
-        save(data)
-
-        st.info(f"🔥 TOTAL XP: {data['xp']}")
-        data["reasons"][today_str]={
-            "time":datetime.now().strftime("%H:%M"),
-            "tasks":reasons_today
-          }
-        save(data)
-        st.success(f"Successfully Saved +{score} Points 🔥")
-        
+         st.session_state.temp_score = score
+         st.session_state.temp_done = done
+         st.session_state.temp_missed = missed   
+      
     st.markdown("---")
     st.subheader("🔒 Final Submit")
 
@@ -437,13 +380,61 @@ elif choice == "🎮 Missions":
 
             if captcha_input != st.session_state.captcha_ans:
                 st.error("❌ Wrong Answer! Try again 😈")
-            else:
-                # Final save
-                data["history"][today_str] = score
-                data["final_submitted"][today_str] = True
-                data["locked_days"].append(today_str)
 
-                save(data)
+        else:
+            final_score = st.session_state.get("temp_score", score)
+            final_missed = st.session_state.get("temp_missed", missed)
+
+            # ✅ save history
+            data["history"][today_str] = final_score
+
+            # ✅ XP
+            data["xp"] += final_score
+            data["points"] += final_score
+
+            # 💪 workout bonus
+            if workout_done == len(workout_tasks):
+                data["xp"] += 50
+                data["points"] += 50
+
+            # 💯 perfect day
+            if final_score == 100:
+                data["xp"] += 100
+                data["points"] += 100
+
+            # ❌ penalty
+            penalty = 0
+            for t in final_missed:
+                penalty += task_xp.get(t, 5)
+
+            data["xp"] -= penalty
+            data["points"] -= penalty
+
+            # 🧠 MA001
+            if "MA001" not in final_missed:
+                data["xp"] += 30
+                data["points"] += 30
+            else:
+                data["xp"] -= 30
+                data["points"] -= 30
+
+            # 📝 reasons
+            data["reasons"][today_str] = {
+                "time": datetime.now().strftime("%H:%M"),
+                "tasks": reasons_today
+            }
+
+            # 🔒 lock
+            data["locked_days"].append(today_str)
+
+            save(data)
+
+            st.success("🔥 FINAL SAVE DONE! Stats Updated ✅")
+
+            del st.session_state["captcha_q"]
+            del st.session_state["captcha_ans"]
+
+            st.rerun()
 
                 st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
 
