@@ -42,13 +42,23 @@ def load():
         "start_date": str(date.today()),
         "final_submitted": {},
         "locked_days": [],
-        }
+    }
+
     if not os.path.exists(DATA_FILE):
         return default
-    data = json.load(open(DATA_FILE))
+
+    try:
+        with open(DATA_FILE, "r") as f:
+            data = json.load(f)
+    except:
+        # 🔥 if file corrupted → reset safely
+        return default
+
+    # missing keys fix
     for k in default:
         if k not in data:
             data[k] = default[k]
+
     return data
 
 def save(d):
