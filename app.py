@@ -329,7 +329,7 @@ elif choice == "🎮 Missions":
                 # 💪 workout track
                 if t in workout_tasks:
                     workout_done += 1
-                completed.append(t)
+                    completed.append(t)
                 else:
                     missed.append(t)
 
