@@ -312,13 +312,13 @@ elif choice == "🎮 Missions":
         for t in tasks:
             total += 1
             locked = today_str in data.get("locked_days", [])
-
-            if not is_ma001_allowed():
-                st.warning("⚠️ First 30 days avoid. After that → 4 days once only")
-                
+         
             if t == "MA001":
 
                 allowed = is_ma001_allowed()
+                
+                if not is_ma001_allowed():
+                st.warning("⚠️ First 30 days avoid. After that → 4 days once only")
 
                 if not allowed:
                     st.checkbox("MA001 ❌ (Blocked)", disabled=True)
