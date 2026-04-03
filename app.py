@@ -357,13 +357,13 @@ elif choice == "🎮 Missions":
             if r:
                 reasons_today[t]=r
 
-     if st.button("SAVE"):
+    if st.button("SAVE"):
 
-         st.success("✅ Progress Saved (Temporary)")
+        st.success("✅ Progress Saved (Temporary)")
 
-         st.session_state.temp_score = score
-         st.session_state.temp_done = done
-         st.session_state.temp_missed = missed   
+        st.session_state.temp_score = score
+        st.session_state.temp_done = done
+        st.session_state.temp_missed = missed   
       
     st.markdown("---")
     st.subheader("🔒 Final Submit")
