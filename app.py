@@ -313,16 +313,17 @@ elif choice == "🎮 Missions":
                 if not allowed:
                     st.checkbox("MA001 ❌ (Blocked)", disabled=True)
                     missed.append(t)
+                    
                 else:
                     if st.checkbox("MA001", key=f"{today_str}_{t}"):
                         done += 1
                         data["ma001_last"] = today_str
-                else:
-                    missed.append(t)
+                    else:
+                        missed.append(t)
 
-                else:
-                    if st.checkbox(t, key=f"{today_str}_{t}"):
-                        done += 1
+            else:
+                if st.checkbox(t, key=f"{today_str}_{t}"):
+                    done += 1
                 else:
                     missed.append(t)
                 # 💪 workout track
