@@ -623,7 +623,8 @@ elif choice == "⚙️ Settings":
                 "badges": [],
                 "reasons": {},
                 "start_date": str(date.today()),
-                "locked_days": []
+                "locked_days": [],
+                "final_submitted": {},
             }
 
             # 💾 SAVE CLEAN FILE
