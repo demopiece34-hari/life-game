@@ -436,13 +436,13 @@ elif choice == "🎮 Missions":
 
             st.rerun()
 
-                st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
+            st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
 
-                # Reset captcha for next day
-                del st.session_state["captcha_q"]
-                del st.session_state["captcha_ans"]
+            # Reset captcha for next day
+            del st.session_state["captcha_q"]
+            del st.session_state["captcha_ans"]
 
-                st.rerun()
+            st.rerun()
 
 elif choice == "📊 Stats":
     
