@@ -323,7 +323,7 @@ elif choice == "🎮 Missions":
                 else:
                     st.info("⏳ Allowed once every 4 days")
 
-                if st.checkbox("MA001", key=f"{today_str}_{t}"):
+                if st.checkbox("MA001", key=f"{today_str}_{t}", disabled=locked):
                     done += 1
 
                     if allowed:
@@ -333,7 +333,7 @@ elif choice == "🎮 Missions":
 
             else:
                 # ✅ normal tasks
-                if st.checkbox(t, key=f"{today_str}_{t}"):
+                if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
                     done += 1
 
                     # 💪 workout tracking
