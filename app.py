@@ -30,7 +30,7 @@ def load():
     "points": 0,
     "xp": 0,
     "ma001_last": "",
-    "ma001_strict": True
+    "ma001_strict": True,
     "streak": 0,
     "last": "",
     "avatar": "😎",
@@ -601,7 +601,7 @@ elif choice == "⚙️ Settings":
                 "points": 0,
                 "xp": 0,
                 "ma001_last": "",
-                "ma001_strict": True
+                "ma001_strict": True,
                 "streak": 0,
                 "last": "",
                 "avatar": "😎",
