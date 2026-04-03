@@ -312,18 +312,19 @@ elif choice == "🎮 Missions":
         for t in tasks:
             total += 1
             locked = today_str in data.get("locked_days", [])
-         
+
             if t == "MA001":
 
                 allowed = is_ma001_allowed()
-                
-                if not is_ma001_allowed():
-                st.warning("⚠️ First 30 days avoid. After that → 4 days once only")
+
+                # ⚠️ warning only for MA001
+                if not allowed:
+                    st.warning("⚠️ First 30 days avoid. After that → 4 days once only")
 
                 if not allowed:
                     st.checkbox("MA001 ❌ (Blocked)", disabled=True)
                     missed.append(t)
-                    
+
                 else:
                     if st.checkbox("MA001", key=f"{today_str}_{t}"):
                         done += 1
@@ -331,17 +332,16 @@ elif choice == "🎮 Missions":
                     else:
                         missed.append(t)
 
-            else:
-                if st.checkbox(t, key=f"{today_str}_{t}"):
-                    done += 1
                 else:
-                    missed.append(t)
-                # 💪 workout track
-                if t in workout_tasks:
-                    workout_done += 1
-                    completed.append(t)
-                else:
-                    missed.append(t)
+                    if st.checkbox(t, key=f"{today_str}_{t}"):
+                        done += 1
+                    else:
+                        missed.append(t)
+
+                    # 💪 workout track
+                    if t in workout_tasks:
+                        workout_done += 1
+                        completed.append(t)
 
     # Score calculation
     score = int((done / total) * 100) if total else 0
