@@ -3,6 +3,8 @@
   "streak": 0,
   "last": "",
   "xp": 0,
+  "ma001_last": "",
+  "ma001_strict": True,
   "avatar": "😎",
   "name": "Player",
   "history": {},
@@ -11,5 +13,5 @@
   "dream": "",
   "reasons": {},
   "final_submitted": {},
-  "start_date": "2026-04-02"
+  "start_date": "2026-04-03"
 }
