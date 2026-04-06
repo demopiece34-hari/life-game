@@ -342,8 +342,8 @@ elif choice == "🎮 Missions":
                         workout_done += 1
                         completed.append(t)
 
-                else:
-                    missed.append(t)
+                    else:
+                        missed.append(t)
 
     # Score calculation
     score = int((done / total) * 100) if total else 0
