@@ -314,29 +314,28 @@ elif choice == "🎮 Missions":
 
         for t in tasks:
             total += 1
-            
-            if t == "MA001":
 
-                allowed = is_ma001_allowed()
+            # 🚨 CONTROL TASKS (MA001 & PN002)
+            if t in ["MA001", "PN002"]:
 
-                if days_passed < 30:
-                    st.warning("⚠️ First 30 days avoid (but you can track)")
+                st.error("🚫 STRICT WARNING: This habit is VERY DANGEROUS — AVOID COMPLETELY 💀")
 
-                else:
-                    st.info("⏳ Allowed once every 4 days")
-
-                if st.checkbox("MA001", key=f"{today_str}_{t}", disabled=locked):
+                if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
                     done += 1
-
-                    if allowed:
-                        data["ma001_last"] = today_str
                 else:
                     missed.append(t)
-
-            else:
+            else:          
                 # ✅ normal tasks
                 if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
                     done += 1
+
+                    # 💪 workout tracking
+                    if t in workout_tasks:
+                        workout_done += 1
+                        completed.append(t)
+
+                else:
+                    missed.append(t)
 
                     # 💪 workout tracking
                     if t in workout_tasks:
