@@ -7,7 +7,7 @@ import plotly.express as px
 from openai import OpenAI
 import os
 
-client = OpenAI(api_key="YOUR_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
 
 # ---------- LOGIN ----------
