@@ -3,6 +3,11 @@ import json, os
 import random
 from datetime import date, datetime, timedelta
 import plotly.express as px
+# ===== AI IMPORT =====
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key="YOUR_API_KEY")
 st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
 
 # ---------- LOGIN ----------
@@ -222,6 +227,39 @@ def is_ma001_allowed():
         diff = (today - last_date).days
         return diff >= 4
     return True
+
+# ===== AI GOD COACH =====
+def ai_god_coach(score, missed, completed, level):
+
+    prompt = f"""
+You are a STRICT LIFE COACH AI 😈
+
+User details:
+Score: {score}
+Level: {level}
+Completed tasks: {completed}
+Missed tasks: {missed}
+
+Rules:
+- Speak only in THANG LISH (Tamil + English mix)
+- Be strict, aggressive, motivating
+- If score low → SCOLD HARD 💀
+- If score high → PRAISE LIKE KING 👑
+- Give:
+   1. Motivation
+   2. Punishment (if bad performance)
+   3. Reward (if good performance)
+   4. Tomorrow plan
+
+Make it short but powerful.
+"""
+
+    res = client.chat.completions.create(
+        model="gpt-5.3",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return res.choices[0].message.content
     
 # ---------- TASK XP VALUES ----------
 task_xp = {
@@ -348,6 +386,13 @@ elif choice == "🎮 Missions":
     # Score calculation
     score = int((done / total) * 100) if total else 0
     st.progress(score / 100)
+    # ===== AI COACH DISPLAY =====
+    st.markdown("---")
+    st.subheader("🤖 GOD AI COACH")
+
+    ai_msg = ai_god_coach(score, missed, completed, level)
+
+    st.error(ai_msg)
     st.write(f"Score: {score}%")
 
     reasons_today={}
@@ -531,6 +576,19 @@ elif choice == "🧑 Profile":
     dream=st.text_input("Dream",value=data.get("dream",""))
 
     st.markdown(f"### Preview: {avatar} {name}")
+
+    # ===== AI VOICE =====
+    import streamlit.components.v1 as components
+
+    if st.button("🔊 AI Voice"):
+        components.html(f"""
+        <script>
+        var msg = new SpeechSynthesisUtterance(`{ai_msg}`);
+        msg.pitch = 0.8;
+        msg.rate = 0.9;
+        speechSynthesis.speak(msg);
+        </script>
+        """)
 
     if st.button("SAVE"):
         data["name"]=name
