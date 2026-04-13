@@ -239,32 +239,27 @@ def ai_god_coach(score, missed, completed, level):
     prompt = f"""
 You are a STRICT LIFE COACH AI 😈
 
-User details:
 Score: {score}
 Level: {level}
-Completed tasks: {completed}
-Missed tasks: {missed}
+Completed: {completed}
+Missed: {missed}
 
-Rules:
-- Speak only in THANG LISH (Tamil + English mix)
-- Be strict, aggressive, motivating
-- If score low → SCOLD HARD 💀
-- If score high → PRAISE LIKE KING 👑
-- Give:
-   1. Motivation
-   2. Punishment (if bad performance)
-   3. Reward (if good performance)
-   4. Tomorrow plan
-
-Make it short but powerful.
+Speak in THANG LISH. Give motivation, punishment, reward, tomorrow plan.
 """
 
-    res = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
+    try:
+        if not os.getenv("OPENAI_API_KEY"):
+            return "⚠️ API KEY NOT SET - check Streamlit Secrets"
 
-    return res.choices[0].message.content
+        res = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        return res.choices[0].message.content
+
+    except Exception as e:
+        return f"❌ AI ERROR: {str(e)}"
     
 # ---------- TASK XP VALUES ----------
 task_xp = {
@@ -394,8 +389,11 @@ elif choice == "🎮 Missions":
     # ===== AI COACH DISPLAY =====
     st.markdown("---")
     st.subheader("🤖 GOD AI COACH")
-
-    ai_msg = ai_god_coach(score, missed, completed, level)
+ 
+    try:
+        ai_msg = ai_god_coach(score, missed, completed, level)
+    except:
+        ai_msg = "⚠️ AI temporarily unavailable"
 
     st.error(ai_msg)
     st.write(f"Score: {score}%")
