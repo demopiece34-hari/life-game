@@ -255,7 +255,7 @@ Make it short but powerful.
 """
 
     res = client.chat.completions.create(
-        model="gpt-5.3",
+        model="gpt-4.1-mini",
         messages=[{"role": "user", "content": prompt}]
     )
 
