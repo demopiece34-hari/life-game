@@ -7,7 +7,8 @@ import plotly.express as px
 from openai import OpenAI
 import os
 
-api_key = os.getenv("OPENAI_API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 if not api_key:
     st.error("❌ OPENAI_API_KEY NOT FOUND - Set in Streamlit Secrets")
