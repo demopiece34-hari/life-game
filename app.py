@@ -78,6 +78,7 @@ def save(d):
 data = load()
 today = date.today()
 today_str = str(today)
+st.write("KEY:", os.getenv("OPENAI_API_KEY"))
 
 # ---------- STRONG CAPTCHA ----------
 if "captcha_q" not in st.session_state:
