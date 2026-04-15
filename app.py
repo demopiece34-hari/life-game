@@ -3,34 +3,23 @@ import json, os
 import random
 from datetime import date, datetime, timedelta
 import plotly.express as px
-# ===== AI IMPORT =====
-from openai import OpenAI
-import os
-
-api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=api_key)
-
-if not api_key:
-    st.error("❌ OPENAI_API_KEY NOT FOUND - Set in Streamlit Secrets")
-
-client = OpenAI(api_key=api_key)
-st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
+st.set_page_config(page_title="Life Game GOD MODE ðŸ˜ˆ", layout="wide")
 
 # ---------- LOGIN ----------
 if "login" not in st.session_state:
     st.session_state.login = False
 
 if not st.session_state.login:
-    st.title("🔐 Login")
+    st.title("ðŸ” Login")
     user = st.text_input("Username")
     pwd = st.text_input("Password", type="password")
 
     if st.button("LOGIN"):
         if user == "hari" and pwd == "9442176514":
             st.session_state.login = True
-            st.success("Login Success ⛓️‍💥")
+            st.success("Login Success â›“ï¸â€ðŸ’¥")
         else:
-            st.error("Wrong credentials 🔗")
+            st.error("Wrong credentials ðŸ”—")
     st.stop()
 
 # ---------- DATA ----------
@@ -44,7 +33,7 @@ def load():
         "ma001_strict": True,
         "streak": 0,
         "last": "",
-        "avatar": "😎",
+        "avatar": "ðŸ˜Ž",
         "name": "Player",
         "dream": "",
         "history": {},
@@ -62,7 +51,7 @@ def load():
         with open(DATA_FILE, "r") as f:
             data = json.load(f)
     except:
-        # 🔥 if file corrupted → reset safely
+        # ðŸ”¥ if file corrupted â†’ reset safely
         return default
 
     # missing keys fix
@@ -78,7 +67,6 @@ def save(d):
 data = load()
 today = date.today()
 today_str = str(today)
-st.write("KEY:", os.getenv("OPENAI_API_KEY"))
 
 # ---------- STRONG CAPTCHA ----------
 if "captcha_q" not in st.session_state:
@@ -102,16 +90,16 @@ remaining_days = max(0, 365 - days_passed)
 
 # ---------- BADGES SYSTEM ----------
 BADGE_RULES = {
-    10: ("🪵", "Marakattai", 50),
-    20: ("🥈", "Silver", 100),
-    30: ("🥈", "Silver II", 150),
-    40: ("💎", "Platinum", 200),
-    50: ("💎", "Platinum II", 250),
-    60: ("🔷", "Diamond", 300),
-    70: ("👑", "Master", 400),
-    80: ("🧠", "Elite", 500),
-    90: ("⚡", "Elite Master", 700),
-    100: ("🔥", "GOD MODE", 1000)
+    10: ("ðŸªµ", "Marakattai", 50),
+    20: ("ðŸ¥ˆ", "Silver", 100),
+    30: ("ðŸ¥ˆ", "Silver II", 150),
+    40: ("ðŸ’Ž", "Platinum", 200),
+    50: ("ðŸ’Ž", "Platinum II", 250),
+    60: ("ðŸ”·", "Diamond", 300),
+    70: ("ðŸ‘‘", "Master", 400),
+    80: ("ðŸ§ ", "Elite", 500),
+    90: ("âš¡", "Elite Master", 700),
+    100: ("ðŸ”¥", "GOD MODE", 1000)
 }
 
 def check_badges():
@@ -137,8 +125,8 @@ if new_badges:
 
     for icon, name, reward in new_badges:
         st.balloons()
-        st.success(f"🎉 {icon} {name} UNLOCKED!")
-        st.info(f"💰 Reward: +{reward} XP & Points 🔥")
+        st.success(f"ðŸŽ‰ {icon} {name} UNLOCKED!")
+        st.info(f"ðŸ’° Reward: +{reward} XP & Points ðŸ”¥")
 
 # ---------- UI STYLE ----------
 st.markdown("""
@@ -178,7 +166,7 @@ body {background:linear-gradient(135deg,#0f172a,#1e293b);color:white;}
 """, unsafe_allow_html=True)
 
 # ---------- NAV ----------
-menu = ["🏠 Dashboard","🎮 Missions","📊 Stats","📜 History","📄 Report","🧑 Profile","🏆 Badges","⚙️ Settings"]
+menu = ["ðŸ  Dashboard","ðŸŽ® Missions","ðŸ“Š Stats","ðŸ“œ History","ðŸ“„ Report","ðŸ§‘ Profile","ðŸ† Badges","âš™ï¸ Settings"]
 choice = st.sidebar.radio("Navigation", menu)
 
 # ---------- TASKS ----------
@@ -187,40 +175,40 @@ weekday = today.strftime("%A")
 task_groups = {
     "Morning": ["Wake 5:30","Brush","Bath","Prayer","Washing"],
 
-    "Workout 💪": [
-        "Walking (40min) 🚶",
-        "Exercise (30min) 🏋️",
-        "Kegel Exercise 🧠",
-        "Breathing 🌬️"
+    "Workout ðŸ’ª": [
+        "Walking (40min) ðŸš¶",
+        "Exercise (30min) ðŸ‹ï¸",
+        "Kegel Exercise ðŸ§ ",
+        "Breathing ðŸŒ¬ï¸"
     ],
 
-    "Learning 📚": [
+    "Learning ðŸ“š": [
         "Python (30min)",
         "English (15min)",
         "Reading (1hr)"
     ],
 
-    "Health 🥗": [
-        "Water 2L 🌊",
-        "No Junk Food 🌮"
+    "Health ðŸ¥—": [
+        "Water 2L ðŸŒŠ",
+        "No Junk Food ðŸŒ®"
     ],
 
-    "Control 🎯": [
+    "Control ðŸŽ¯": [
         "MA001",
         "PN002"
     ],
 
-    "Limited Control ⏳": [
+    "Limited Control â³": [
         "Instagram (20min)",
         "YouTube (20min)"
     ]
 }
 
 if weekday == "Saturday":
-    task_groups["Weekend"] = ["Movie 🎬"]
+    task_groups["Weekend"] = ["Movie ðŸŽ¬"]
 
 if weekday == "Sunday":
-    task_groups["Weekend"] = ["Oil Bath 🛁"]
+    task_groups["Weekend"] = ["Oil Bath ðŸ›"]
     
 # ---------- MA001 CONTROL ----------
 def is_ma001_allowed():
@@ -234,34 +222,6 @@ def is_ma001_allowed():
         diff = (today - last_date).days
         return diff >= 4
     return True
-
-# ===== AI GOD COACH =====
-def ai_god_coach(score, missed, completed, level):
-
-    prompt = f"""
-You are a STRICT LIFE COACH AI 😈
-
-Score: {score}
-Level: {level}
-Completed: {completed}
-Missed: {missed}
-
-Speak in THANG LISH. Give motivation, punishment, reward, tomorrow plan.
-"""
-
-    try:
-        if not os.getenv("OPENAI_API_KEY"):
-            return "⚠️ API KEY NOT SET - check Streamlit Secrets"
-
-        res = client.chat.completions.create(
-            model="gpt-4.1-mini",
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        return res.choices[0].message.content
-
-    except Exception as e:
-        return f"❌ AI ERROR: {str(e)}"
     
 # ---------- TASK XP VALUES ----------
 task_xp = {
@@ -270,10 +230,10 @@ task_xp = {
     "Bath": 5,
     "Prayer": 10,
 
-    "Walking (40min) 🚶": 20,
-    "Exercise (30min) 🏋️": 25,
-    "Kegel Exercise 🧠": 15,
-    "Breathing 🌬️": 10,
+    "Walking (40min) ðŸš¶": 20,
+    "Exercise (30min) ðŸ‹ï¸": 25,
+    "Kegel Exercise ðŸ§ ": 15,
+    "Breathing ðŸŒ¬ï¸": 10,
 
     "Python": 20,
     "English": 15,
@@ -284,16 +244,16 @@ task_xp = {
 }
 
 # ---------- NAVIGATION HANDLER (Corrected Order) ----------
-if choice == "🏠 Dashboard":
+if choice == "ðŸ  Dashboard":
 
-    st.title("🎯 LIFE GAME")
+    st.title("ðŸŽ¯ LIFE GAME")
 
     st.markdown(f"""
     <div class='card'>
     <h1 style='text-align:center;font-size:70px;animation:float 3s infinite;'>{data['avatar']}</h1>
     <h2 style='text-align:center;'>{data['name']}</h2>
     <h3 style='text-align:center;'>Level {level}/100</h3>
-    <p style='text-align:center;'>🎯 Remaining Days: {remaining_days}</p>
+    <p style='text-align:center;'>ðŸŽ¯ Remaining Days: {remaining_days}</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -315,13 +275,13 @@ if choice == "🏠 Dashboard":
         font-size:14px;
         animation:fade 1s;
     '>
-        📅 {current_day} | {current_date}
+        ðŸ“… {current_day} | {current_date}
     </div>
     """, unsafe_allow_html=True)
 
-elif choice == "🎮 Missions":
+elif choice == "ðŸŽ® Missions":
 
-    st.title("🎮 Missions")
+    st.title("ðŸŽ® Missions")
 
     done = 0
     total = 0
@@ -330,10 +290,10 @@ elif choice == "🎮 Missions":
     locked = today_str in data.get("locked_days", [])
     
     workout_tasks = [
-        "Walking (40min) 🚶",
-        "Exercise (30min) 🏋️",
-        "Kegel Exercise 🧠",
-        "Breathing 🌬️"
+        "Walking (40min) ðŸš¶",
+        "Exercise (30min) ðŸ‹ï¸",
+        "Kegel Exercise ðŸ§ ",
+        "Breathing ðŸŒ¬ï¸"
     ]
 
     workout_done = 0
@@ -341,10 +301,10 @@ elif choice == "🎮 Missions":
     
     # ---------- WORKOUT TASK LIST ----------
     workout_tasks = [
-        "Walking (40min) 🚶",
-        "Exercise (30min) 🏋️",
-        "Kegel Exercise 🧠",
-        "Breathing 🌬️"
+        "Walking (40min) ðŸš¶",
+        "Exercise (30min) ðŸ‹ï¸",
+        "Kegel Exercise ðŸ§ ",
+        "Breathing ðŸŒ¬ï¸"
     ]
 
     workout_done = 0
@@ -354,50 +314,41 @@ elif choice == "🎮 Missions":
 
         for t in tasks:
             total += 1
+            
+            if t == "MA001":
 
-            # 🚨 CONTROL TASKS (MA001 & PN002)
-            if t in ["MA001", "PN002"]:
+                allowed = is_ma001_allowed()
 
-                st.error("🚫 STRICT WARNING: This habit is VERY DANGEROUS — AVOID COMPLETELY 💀")
+                if days_passed < 30:
+                    st.warning("âš ï¸ First 30 days avoid (but you can track)")
 
-                if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
+                else:
+                    st.info("â³ Allowed once every 4 days")
+
+                if st.checkbox("MA001", key=f"{today_str}_{t}", disabled=locked):
                     done += 1
+
+                    if allowed:
+                        data["ma001_last"] = today_str
                 else:
                     missed.append(t)
-            else:          
-                # ✅ normal tasks
+
+            else:
+                # âœ… normal tasks
                 if st.checkbox(t, key=f"{today_str}_{t}", disabled=locked):
                     done += 1
 
-                    # 💪 workout tracking
+                    # ðŸ’ª workout tracking
                     if t in workout_tasks:
                         workout_done += 1
                         completed.append(t)
 
                 else:
                     missed.append(t)
-
-                    # 💪 workout tracking
-                    if t in workout_tasks:
-                        workout_done += 1
-                        completed.append(t)
-
-                    else:
-                        missed.append(t)
 
     # Score calculation
     score = int((done / total) * 100) if total else 0
     st.progress(score / 100)
-    # ===== AI COACH DISPLAY =====
-    st.markdown("---")
-    st.subheader("🤖 GOD AI COACH")
- 
-    try:
-        ai_msg = ai_god_coach(score, missed, completed, level)
-    except:
-        ai_msg = "⚠️ AI temporarily unavailable"
-
-    st.error(ai_msg)
     st.write(f"Score: {score}%")
 
     reasons_today={}
@@ -410,30 +361,30 @@ elif choice == "🎮 Missions":
 
     if st.button("SAVE"):
 
-        st.success("✅ Progress Saved (Temporary)")
+        st.success("âœ… Progress Saved (Temporary)")
 
         st.session_state.temp_score = score
         st.session_state.temp_done = done
         st.session_state.temp_missed = missed   
       
     st.markdown("---")
-    st.subheader("🔒 Final Submit")
+    st.subheader("ðŸ”’ Final Submit")
 
     locked = today_str in data.get("locked_days", [])
 
     if locked:
-        st.error("🔒 Today already FINAL SAVED! Editing disabled ❌")
+        st.error("ðŸ”’ Today already FINAL SAVED! Editing disabled âŒ")
     else:
-        st.write(f"🧠 Solve this CAPTCHA to FINAL SAVE: {st.session_state.captcha_q}")
+        st.write(f"ðŸ§  Solve this CAPTCHA to FINAL SAVE: {st.session_state.captcha_q}")
         captcha_input = st.text_input("Enter Answer")
 
-        if st.button("FINAL SAVE 💀"):
+        if st.button("FINAL SAVE ðŸ’€"):
 
-            # ❌ Wrong captcha
+            # âŒ Wrong captcha
             if captcha_input != st.session_state.captcha_ans:
-                st.error("❌ Wrong Answer! Try again 😈")
+                st.error("âŒ Wrong Answer! Try again ðŸ˜ˆ")
 
-            # ✅ Correct captcha → FINAL SAVE
+            # âœ… Correct captcha â†’ FINAL SAVE
             else:
                 final_score = st.session_state.get("temp_score", score)
                 final_missed = st.session_state.get("temp_missed", missed)
@@ -477,12 +428,12 @@ elif choice == "🎮 Missions":
                     "tasks": reasons_today
                 }
 
-                # 🔒 lock day
+                # ðŸ”’ lock day
                 data["locked_days"].append(today_str)
 
                 save(data)
 
-                st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
+                st.success("ðŸ”¥ FINAL SAVE DONE! Locked for today ðŸ”’")
 
                 # reset captcha
                 del st.session_state["captcha_q"]
@@ -490,7 +441,7 @@ elif choice == "🎮 Missions":
 
                 st.rerun()
 
-                st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
+                st.success("ðŸ”¥ FINAL SAVE DONE! Locked for today ðŸ”’")
 
                 # Reset captcha for next day
                 del st.session_state["captcha_q"]
@@ -498,21 +449,21 @@ elif choice == "🎮 Missions":
 
                 st.rerun()
 
-elif choice == "📊 Stats":
+elif choice == "ðŸ“Š Stats":
     
-    st.title("📊 Stats")
+    st.title("ðŸ“Š Stats")
 
-    # 🔥 XP DISPLAY FORMAT
+    # ðŸ”¥ XP DISPLAY FORMAT
     MAX_XP = 10000
-    st.write(f"🔥 XP: {data['xp']} / {MAX_XP}")
+    st.write(f"ðŸ”¥ XP: {data['xp']} / {MAX_XP}")
 
     # progress bar
     MAX_XP = 10000
 
-    # ❌ prevent negative XP
+    # âŒ prevent negative XP
     data["xp"] = max(0, data["xp"])
 
-    # ✅ safe progress calculation
+    # âœ… safe progress calculation
     progress_value = data["xp"] / MAX_XP
     progress_value = max(0.0, min(progress_value, 1.0))
 
@@ -524,7 +475,7 @@ elif choice == "📊 Stats":
         dates=list(history.keys())
         scores=list(history.values())
 
-        st.plotly_chart(px.line(x=dates,y=scores,title="📈 Growth"))
+        st.plotly_chart(px.line(x=dates,y=scores,title="ðŸ“ˆ Growth"))
 
         today_score = history.get(today_str,0)
 
@@ -534,7 +485,7 @@ elif choice == "📊 Stats":
             names=["Completed","Pending"]
         ))
 
-elif choice == "📜 History":
+elif choice == "ðŸ“œ History":
 
     for d,s in data["history"].items():
         st.markdown(f"<div class='card'>{d} - Score: {s}</div>",unsafe_allow_html=True)
@@ -544,11 +495,11 @@ elif choice == "📜 History":
             st.write("Time:",r["time"])
 
             for t,rs in r["tasks"].items():
-                st.write(f"{t} → {rs}")
+                st.write(f"{t} â†’ {rs}")
 
-elif choice == "📄 Report":
+elif choice == "ðŸ“„ Report":
 
-    st.title("📄 📊 Daily Report 📈")
+    st.title("ðŸ“„ ðŸ“Š Daily Report ðŸ“ˆ")
 
     if today_str in data["history"]:
         score=data["history"][today_str]
@@ -567,72 +518,59 @@ Score: {score}
         if "tasks" in reasons:
             report+="Missed Tasks:\n"
             for t,r in reasons["tasks"].items():
-                report+=f"{t} → {r}\n"
+                report+=f"{t} â†’ {r}\n"
 
         st.text_area("Report",report,height=300)
         st.download_button("Download Report",report,f"report_{today_str}.txt")
 
-elif choice == "🧑 Profile":
+elif choice == "ðŸ§‘ Profile":
 
-    st.title("🧑 Profile")
+    st.title("ðŸ§‘ Profile")
 
     name=st.text_input("Name",value=data["name"])
-    avatar=st.selectbox("Avatar",["😎","🔥","👑","💪"])
+    avatar=st.selectbox("Avatar",["ðŸ˜Ž","ðŸ”¥","ðŸ‘‘","ðŸ’ª"])
     dream=st.text_input("Dream",value=data.get("dream",""))
 
     st.markdown(f"### Preview: {avatar} {name}")
-
-    # ===== AI VOICE =====
-    import streamlit.components.v1 as components
-
-    if st.button("🔊 AI Voice"):
-        components.html(f"""
-        <script>
-        var msg = new SpeechSynthesisUtterance(`{ai_msg}`);
-        msg.pitch = 0.8;
-        msg.rate = 0.9;
-        speechSynthesis.speak(msg);
-        </script>
-        """)
 
     if st.button("SAVE"):
         data["name"]=name
         data["avatar"]=avatar
         data["dream"]=dream
         save(data)
-        st.success("Profile Saved ✅")
-    st.subheader("🏆 Your Badges")
+        st.success("Profile Saved âœ…")
+    st.subheader("ðŸ† Your Badges")
 
     if data["badges"]:
         for b in data["badges"]:
-            st.write(f"🏅 {b}")
+            st.write(f"ðŸ… {b}")
     else:
-        st.write("No badges unlocked yet 🔒")
+        st.write("No badges unlocked yet ðŸ”’")
 
-    st.subheader("🔥 XP Progress")
+    st.subheader("ðŸ”¥ XP Progress")
 
     st.write(f"Total XP: {data['xp']}")
-    xp = max(0, data["xp"])  # ❌ negative avoid
+    xp = max(0, data["xp"])  # âŒ negative avoid
     progress = xp / 1000
 
-    # ✅ clamp between 0 and 1
+    # âœ… clamp between 0 and 1
     progress = max(0.0, min(progress, 1.0))
 
     st.progress(progress)
 
     st.markdown("---")
-    st.subheader("📅 Progress Info")
+    st.subheader("ðŸ“… Progress Info")
 
-    st.write(f"🔥 Total Days Tracked: {len(data.get('history', {}))}")
-    st.write(f"🔒 Locked Days: {len(data.get('locked_days', []))}")
-    st.write(f"⏳ Remaining Days: {365 - (len(data.get('history', {})))}")
+    st.write(f"ðŸ”¥ Total Days Tracked: {len(data.get('history', {}))}")
+    st.write(f"ðŸ”’ Locked Days: {len(data.get('locked_days', []))}")
+    st.write(f"â³ Remaining Days: {365 - (len(data.get('history', {})))}")
     
-elif choice == "🏆 Badges":
+elif choice == "ðŸ† Badges":
 
-    st.title("🏆 Your Badges")
+    st.title("ðŸ† Your Badges")
 
     if not data["badges"]:
-        st.warning("🔒 All badges are LOCKED. Level up to unlock!")
+        st.warning("ðŸ”’ All badges are LOCKED. Level up to unlock!")
 
     for lvl, (icon, name, reward) in BADGE_RULES.items():
 
@@ -640,37 +578,37 @@ elif choice == "🏆 Badges":
             st.markdown(f"""
             <div class='card'>
             <h2>{icon} {name} (Level {lvl})</h2>
-            <p style='color:lightgreen;'>UNLOCKED ✅</p>
-            <p>🎁 Reward Earned: +{reward}</p>
+            <p style='color:lightgreen;'>UNLOCKED âœ…</p>
+            <p>ðŸŽ Reward Earned: +{reward}</p>
             </div>
             """, unsafe_allow_html=True)
 
         else:
             st.markdown(f"""
             <div class='card'>
-            <h2>🔒 Locked Badge</h2>
+            <h2>ðŸ”’ Locked Badge</h2>
             <p>Unlock at Level {lvl}</p>
-            <p>🎁 Reward: +{reward}</p>
+            <p>ðŸŽ Reward: +{reward}</p>
             </div>
             """, unsafe_allow_html=True)
             
-elif choice == "⚙️ Settings":
+elif choice == "âš™ï¸ Settings":
 
-    st.markdown("<div class='card'>⚙️ Settings Panel</div>", unsafe_allow_html=True)
+    st.markdown("<div class='card'>âš™ï¸ Settings Panel</div>", unsafe_allow_html=True)
 
     pwd = st.text_input("Enter Password", type="password")
 
-    # ⚠️ CONFIRM CHECKBOX (NEW ADD)
-    confirm = st.checkbox("⚠️ Are you sure you want to reset ALL data?")
+    # âš ï¸ CONFIRM CHECKBOX (NEW ADD)
+    confirm = st.checkbox("âš ï¸ Are you sure you want to reset ALL data?")
 
-    if st.button("RESET ALL DATA 💀"):
+    if st.button("RESET ALL DATA ðŸ’€"):
 
         if not confirm:
-            st.warning("⚠️ Please confirm reset")
+            st.warning("âš ï¸ Please confirm reset")
         
         elif pwd == "h1a2r3i4s5h6":
 
-            # 🔥 FULL RESET DATA
+            # ðŸ”¥ FULL RESET DATA
             reset_data = {
                 "points": 0,
                 "xp": 0,
@@ -678,7 +616,7 @@ elif choice == "⚙️ Settings":
                 "ma001_strict": True,
                 "streak": 0,
                 "last": "",
-                "avatar": "😎",
+                "avatar": "ðŸ˜Ž",
                 "name": "Player",
                 "dream": "",
                 "history": {},
@@ -689,17 +627,17 @@ elif choice == "⚙️ Settings":
                 "final_submitted": {},
             }
 
-            # 💾 SAVE CLEAN FILE
+            # ðŸ’¾ SAVE CLEAN FILE
             with open(DATA_FILE, "w") as f:
                 json.dump(reset_data, f)
 
-            # 🔥 CLEAR SESSION
+            # ðŸ”¥ CLEAR SESSION
             st.session_state.clear()
 
-            st.success("💀 FULL RESET DONE")
-            st.warning("🔄 Reloading App...")
+            st.success("ðŸ’€ FULL RESET DONE")
+            st.warning("ðŸ”„ Reloading App...")
 
             st.rerun()
 
         else:
-            st.error("❌ Wrong Password")
+            st.error("âŒ Wrong Password")
