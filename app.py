@@ -2,7 +2,7 @@ import streamlit as st
 import json, os
 import random
 from datetime import date, datetime, timedelta
-import plotly.express as px
+import matplotlib.pyplot as plt
 st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
 
 # ---------- LOGIN ----------
