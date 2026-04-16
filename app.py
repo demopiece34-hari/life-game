@@ -640,4 +640,3 @@ elif choice == "⚙️ Settings":
 
         else:
             st.error("❌ Wrong Password")
-Ithula oru ai coach add panni thanglish sollanum msg show voice kekkanum
