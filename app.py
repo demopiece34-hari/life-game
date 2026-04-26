@@ -917,38 +917,100 @@ elif choice == "💸 Money Tracker":
 
 # LIFE WHEEL
 elif choice == "⚖️ Life Wheel":
-    st.title("⚖️ Life Wheel Analysis")
+    st.title("⚖️ Life Wheel Mission Analysis")
 
-    st.info("Health, Study, Money, Mind, Discipline balance check panna use pannunga.")
+    st.info("Ithu unga daily mission performance ah automatic analyze panni Life Wheel chart ah kaamikum.")
 
-    categories = ["Health", "Study", "Money", "Mind", "Discipline", "Dream", "Family", "Fitness"]
+    saved_temp = data.get("temp_progress", {}).get(today_str, {})
+    history_score = data.get("history", {}).get(today_str, None)
 
-    data.setdefault("life_wheel", {})
-    today_wheel = data["life_wheel"].get(today_str, {})
+    analysis = {}
 
-    new_scores = {}
-    for c in categories:
-        new_scores[c] = st.slider(c, 0, 10, int(today_wheel.get(c, 5)))
+    mapping = {
+        "Health": ["Water 2L 🌊", "No Junk Food 🌮", "Bath"],
+        "Study": ["Python (30min)", "English (15min)", "Reading (1hr)"],
+        "Fitness": ["Walking (40min) 🚶", "Exercise (30min) 🏋️", "Breathing 🌬️"],
+        "Discipline": ["Wake 5:30", "Prayer", "Washing"],
+        "Control": ["MA001", "PN002"],
+        "Dream": data.get("dream_steps", []),
+        "Mind": ["Kegel Exercise 🧠", "Breathing 🌬️"],
+        "Money": []
+    }
 
-    if st.button("Save Life Wheel"):
-        data["life_wheel"][today_str] = new_scores
-        save(data)
-        st.success("Life wheel saved ✅")
-        st.rerun()
+    money = data.get("money", {})
+    total_income = sum(x["amount"] for x in money.get("income", []))
+    total_expense = sum(x["amount"] for x in money.get("expense", []))
+    balance = total_income - total_expense
 
-    if data.get("life_wheel"):
-        latest_date = sorted(data["life_wheel"].keys())[-1]
-        latest_scores = data["life_wheel"][latest_date]
-        rows = [{"Area": k, "Score": v} for k, v in latest_scores.items()]
+    for area, tasks in mapping.items():
+        if area == "Money":
+            if total_income == 0 and total_expense == 0:
+                analysis[area] = 5
+            elif balance > 0:
+                analysis[area] = 8
+            elif balance == 0:
+                analysis[area] = 6
+            else:
+                analysis[area] = 3
+        elif not tasks:
+            analysis[area] = 5
+        else:
+            done = 0
+            total = len(tasks)
 
-        st.subheader(f"Latest Analysis: {latest_date}")
-        st.plotly_chart(px.line_polar(rows, r="Score", theta="Area", line_close=True, title="Life Balance Wheel"), use_container_width=True)
+            for t in tasks:
+                if saved_temp.get(t, False):
+                    done += 1
 
-        weak = min(rows, key=lambda x: x["Score"])
-        strong = max(rows, key=lambda x: x["Score"])
+            score_10 = int((done / total) * 10) if total else 5
+            analysis[area] = score_10
 
-        st.warning(f"⚠️ Weak Area: {weak['Area']} → {weak['Score']}/10")
-        st.success(f"🔥 Strong Area: {strong['Area']} → {strong['Score']}/10")
+    rows = [{"Area": k, "Score": v} for k, v in analysis.items()]
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Today Final Score", "-" if history_score is None else f"{history_score}%")
+    col2.metric("Money Balance", f"₹{balance}")
+    col3.metric("Mission Data", "Final Saved" if history_score is not None else "Live Preview")
+
+    st.subheader("📈 Life Wheel Chart")
+    st.plotly_chart(
+        px.line_polar(
+            rows,
+            r="Score",
+            theta="Area",
+            line_close=True,
+            title="Life Balance Based on Missions"
+        ),
+        use_container_width=True
+    )
+
+    st.subheader("📊 Area Wise Score")
+    st.plotly_chart(
+        px.bar(
+            rows,
+            x="Area",
+            y="Score",
+            title="Mission Area Score / 10"
+        ),
+        use_container_width=True
+    )
+
+    weak = min(rows, key=lambda x: x["Score"])
+    strong = max(rows, key=lambda x: x["Score"])
+
+    st.warning(f"⚠️ Weak Area: {weak['Area']} → {weak['Score']}/10")
+    st.success(f"🔥 Strong Area: {strong['Area']} → {strong['Score']}/10")
+
+    st.markdown("---")
+    st.subheader("🧠 Analysis")
+
+    for r in rows:
+        if r["Score"] >= 8:
+            st.success(f"{r['Area']}: Strong ah irukku ✅")
+        elif r["Score"] >= 5:
+            st.info(f"{r['Area']}: Average. Innum improve pannalam.")
+        else:
+            st.error(f"{r['Area']}: Weak. Next focus inga venum ⚠️")
 
 # SETTINGS
 elif choice == "⚙️ Settings":
