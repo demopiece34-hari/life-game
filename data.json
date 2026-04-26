@@ -1,17 +1,53 @@
 {
   "points": 0,
-  "streak": 0,
-  "last": "",
   "xp": 0,
   "ma001_last": "",
   "ma001_strict": true,
+  "streak": 0,
+  "best_streak": 0,
+  "last": "",
   "avatar": "😎",
   "name": "Player",
+  "dream": "",
+  "dream_steps": [],
   "history": {},
   "badges": [],
-  "locked_days": [],
-  "dream": "",
   "reasons": {},
+  "start_date": "2026-04-26",
   "final_submitted": {},
-  "start_date": "2026-04-26"
+  "locked_days": [],
+  "custom_tasks": [],
+  "custom_task_xp": {},
+  "theme": "Dark",
+  "quote_mode": true,
+  "difficulty": "Normal",
+  "mobile_nav": false,
+  "moods": {},
+  "temp_progress": {},
+  "weekly_goals": {},
+  "shop_items": [],
+  "unlocked_shop": [],
+  "control_tracker": {
+    "MA001": {
+      "fail_count": 0,
+      "best_clean": 0,
+      "current_clean": 0,
+      "last_fail": ""
+    },
+    "PN002": {
+      "fail_count": 0,
+      "best_clean": 0,
+      "current_clean": 0,
+      "last_fail": ""
+    }
+  },
+  "water_logs": {},
+  "money": {
+    "balance": 0,
+    "income": [],
+    "expense": []
+  },
+  "punishments": {},
+  "punishment_done": {},
+  "life_wheel": {}
 }
