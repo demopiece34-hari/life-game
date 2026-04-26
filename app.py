@@ -6,9 +6,10 @@ import plotly.express as px
 st.set_page_config(page_title="Life Game GOD MODE 😈", layout="wide")
 
 DATA_FILE = "data.json"
-LOGIN_USER = "hari"
-LOGIN_PASS = "9442176514"
-RESET_PASS = "h1a2r3i4s5h6"
+
+LOGIN_USER = st.secrets.get("LOGIN_USER", "hari") if hasattr(st, "secrets") else "hari"
+LOGIN_PASS = st.secrets.get("LOGIN_PASS", "9442176514") if hasattr(st, "secrets") else "9442176514"
+RESET_PASS = st.secrets.get("RESET_PASS", "h1a2r3i4s5h6") if hasattr(st, "secrets") else "h1a2r3i4s5h6"
 
 
 def default_data():
@@ -31,17 +32,23 @@ def default_data():
         "final_submitted": {},
         "locked_days": [],
         "custom_tasks": [],
+        "custom_task_xp": {},
         "theme": "Dark",
-        "quote_mode": True
+        "quote_mode": True,
+        "difficulty": "Normal",
+        "mobile_nav": False,
+        "moods": {},
+        "temp_progress": {},
+        "weekly_goals": {},
+        "shop_items": [],
+        "unlocked_shop": []
     }
 
 
 def load():
     base = default_data()
-
     if not os.path.exists(DATA_FILE):
         return base
-
     try:
         with open(DATA_FILE, "r") as f:
             data = json.load(f)
@@ -51,7 +58,6 @@ def load():
     for k in base:
         if k not in data:
             data[k] = base[k]
-
     return data
 
 
@@ -61,16 +67,11 @@ def save(d):
 
 
 def compute_streak(history):
-    if not history:
-        return 0
-
     streak = 0
     d = date.today()
-
     while str(d) in history:
         streak += 1
         d -= timedelta(days=1)
-
     return streak
 
 
@@ -85,35 +86,61 @@ def motivation(score):
         return "💪 Good work. Small improvements daily create big change."
     elif score >= 40:
         return "⚠️ Average day. Don’t quit, fix tomorrow."
-    else:
-        return "🚨 Reset your focus. One bad day is not the end."
+    return "🚨 Reset your focus. One bad day is not the end."
 
 
 def get_theme_css(theme):
     if theme == "Light":
-        return """
-        <style>
-        body {background:#f8fafc;color:#0f172a;}
-        .card {
-            background:rgba(0,0,0,0.06);
-            padding:20px;
-            border-radius:20px;
-            margin-bottom:15px;
-            animation:fade 0.6s;
-        }
-        </style>
-        """
-    return """
+        bg = "#f8fafc"
+        text = "#0f172a"
+        card = "rgba(0,0,0,0.06)"
+    elif theme == "Purple":
+        bg = "linear-gradient(135deg,#2e1065,#4c1d95)"
+        text = "white"
+        card = "rgba(255,255,255,0.10)"
+    elif theme == "Green":
+        bg = "linear-gradient(135deg,#052e16,#14532d)"
+        text = "white"
+        card = "rgba(255,255,255,0.10)"
+    else:
+        bg = "linear-gradient(135deg,#0f172a,#1e293b)"
+        text = "white"
+        card = "rgba(255,255,255,0.08)"
+
+    return f"""
     <style>
-    body {background:linear-gradient(135deg,#0f172a,#1e293b);color:white;}
-    .card {
-        background:rgba(255,255,255,0.08);
+    body {{background:{bg};color:{text};}}
+    .card {{
+        background:{card};
         padding:20px;
         border-radius:20px;
         backdrop-filter:blur(12px);
         margin-bottom:15px;
         animation:fade 0.6s;
-    }
+    }}
+    @keyframes fade {{
+        from{{opacity:0;transform:translateY(20px);}}
+        to{{opacity:1;}}
+    }}
+    @keyframes float {{
+        0%{{transform:translateY(0)}}
+        50%{{transform:translateY(-12px)}}
+        100%{{transform:translateY(0)}}
+    }}
+    .stButton button {{
+        background:linear-gradient(45deg,#6366f1,#8b5cf6);
+        color:white;
+        border-radius:10px;
+        transition:0.3s;
+    }}
+    .stButton button:hover {{transform:scale(1.05);}}
+    @media(max-width:768px){{
+        .block-container{{padding:1rem;}}
+        h1{{font-size:28px!important;}}
+        h2{{font-size:22px!important;}}
+        h3{{font-size:18px!important;}}
+        .card{{padding:14px!important;border-radius:14px!important;}}
+    }}
     </style>
     """
 
@@ -149,18 +176,10 @@ if "captcha_q" not in st.session_state:
     a = random.randint(10, 50)
     b = random.randint(10, 50)
     op = random.choice(["+", "-", "*"])
-
-    if op == "+":
-        ans = a + b
-    elif op == "-":
-        ans = a - b
-    else:
-        ans = a * b
-
+    ans = a + b if op == "+" else a - b if op == "-" else a * b
     st.session_state.captcha_q = f"{a} {op} {b}"
     st.session_state.captcha_ans = str(ans)
 
-# LEVEL
 days_passed = (today - datetime.strptime(data["start_date"], "%Y-%m-%d").date()).days
 level = min(100, int((days_passed / 365) * 100))
 remaining_days = max(0, 365 - days_passed)
@@ -198,37 +217,7 @@ if new_badges:
         st.success(f"🎉 {icon} {name} UNLOCKED!")
         st.info(f"💰 Reward: +{reward} XP & Points 🔥")
 
-# STYLE
 st.markdown(get_theme_css(data.get("theme", "Dark")), unsafe_allow_html=True)
-st.markdown("""
-<style>
-@keyframes fade {
-    from{opacity:0;transform:translateY(20px);}
-    to{opacity:1;}
-}
-@keyframes float {
-    0%{transform:translateY(0)}
-    50%{transform:translateY(-12px)}
-    100%{transform:translateY(0)}
-}
-.stButton button {
-    background:linear-gradient(45deg,#6366f1,#8b5cf6);
-    color:white;
-    border-radius:10px;
-    transition:0.3s;
-}
-.stButton button:hover {
-    transform:scale(1.05);
-}
-@media(max-width:768px){
-    .block-container{padding:1rem;}
-    h1{font-size:28px!important;}
-    h2{font-size:22px!important;}
-    h3{font-size:18px!important;}
-    .card{padding:14px!important;border-radius:14px!important;}
-}
-</style>
-""", unsafe_allow_html=True)
 
 menu = [
     "🏠 Dashboard",
@@ -240,38 +229,24 @@ menu = [
     "🎯 Dream",
     "🧑 Profile",
     "🏆 Badges",
+    "🛒 Shop",
     "⚙️ Settings"
 ]
 
-choice = st.sidebar.radio("Navigation", menu, key="main_navigation")
+if data.get("mobile_nav", False):
+    choice = st.sidebar.selectbox("Navigation", menu, key="main_navigation_mobile")
+else:
+    choice = st.sidebar.radio("Navigation", menu, key="main_navigation")
 
 weekday = today.strftime("%A")
 
 task_groups = {
     "Morning": ["Wake 5:30", "Brush", "Bath", "Prayer", "Washing"],
-    "Workout 💪": [
-        "Walking (40min) 🚶",
-        "Exercise (30min) 🏋️",
-        "Kegel Exercise 🧠",
-        "Breathing 🌬️"
-    ],
-    "Learning 📚": [
-        "Python (30min)",
-        "English (15min)",
-        "Reading (1hr)"
-    ],
-    "Health 🥗": [
-        "Water 2L 🌊",
-        "No Junk Food 🌮"
-    ],
-    "Control 🎯": [
-        "MA001",
-        "PN002"
-    ],
-    "Limited Control ⏳": [
-        "Instagram (20min)",
-        "YouTube (20min)"
-    ]
+    "Workout 💪": ["Walking (40min) 🚶", "Exercise (30min) 🏋️", "Kegel Exercise 🧠", "Breathing 🌬️"],
+    "Learning 📚": ["Python (30min)", "English (15min)", "Reading (1hr)"],
+    "Health 🥗": ["Water 2L 🌊", "No Junk Food 🌮"],
+    "Control 🎯": ["MA001", "PN002"],
+    "Limited Control ⏳": ["Instagram (20min)", "YouTube (20min)"]
 }
 
 if data.get("custom_tasks"):
@@ -287,27 +262,16 @@ if weekday == "Sunday":
     task_groups["Weekend"] = ["Oil Bath 🛁"]
 
 task_xp = {
-    "Wake 5:30": 10,
-    "Brush": 5,
-    "Bath": 5,
-    "Prayer": 10,
-    "Washing": 5,
-    "Walking (40min) 🚶": 20,
-    "Exercise (30min) 🏋️": 25,
-    "Kegel Exercise 🧠": 15,
-    "Breathing 🌬️": 10,
-    "Python (30min)": 20,
-    "English (15min)": 15,
-    "Reading (1hr)": 15,
-    "Water 2L 🌊": 10,
-    "No Junk Food 🌮": 20,
-    "Instagram (20min)": 5,
-    "YouTube (20min)": 5,
-    "Movie 🎬": 5,
-    "Oil Bath 🛁": 5,
-    "MA001": 30,
-    "PN002": 30,
+    "Wake 5:30": 10, "Brush": 5, "Bath": 5, "Prayer": 10, "Washing": 5,
+    "Walking (40min) 🚶": 20, "Exercise (30min) 🏋️": 25,
+    "Kegel Exercise 🧠": 15, "Breathing 🌬️": 10,
+    "Python (30min)": 20, "English (15min)": 15, "Reading (1hr)": 15,
+    "Water 2L 🌊": 10, "No Junk Food 🌮": 20,
+    "Instagram (20min)": 5, "YouTube (20min)": 5,
+    "Movie 🎬": 5, "Oil Bath 🛁": 5,
+    "MA001": 30, "PN002": 30
 }
+task_xp.update(data.get("custom_task_xp", {}))
 
 # DASHBOARD
 if choice == "🏠 Dashboard":
@@ -318,6 +282,9 @@ if choice == "🏠 Dashboard":
     col2.metric("💰 Points", data["points"])
     col3.metric("⚡ Streak", data["streak"])
     col4.metric("🏆 Best Streak", data["best_streak"])
+
+    if today_str not in data.get("history", {}):
+        st.warning("⚠️ Today final submit pending!")
 
     st.markdown(f"""
     <div class='card'>
@@ -335,26 +302,11 @@ if choice == "🏠 Dashboard":
     elif data.get("quote_mode", True):
         st.info("🚀 Finish today’s missions and final submit.")
 
-    current_day = today.strftime("%A")
-    current_date = today.strftime("%d-%m-%Y")
-
-    st.markdown(f"""
-    <div style='
-        position:fixed;
-        bottom:10px;
-        left:50%;
-        transform:translateX(-50%);
-        background:rgba(255,255,255,0.08);
-        padding:10px 20px;
-        border-radius:15px;
-        backdrop-filter:blur(10px);
-        text-align:center;
-        font-size:14px;
-        animation:fade 1s;
-    '>
-        📅 {current_day} | {current_date}
-    </div>
-    """, unsafe_allow_html=True)
+    mood = st.selectbox("Today Mood", ["😄 Happy", "🙂 Good", "😐 Normal", "😞 Low"], key="today_mood")
+    if st.button("Save Mood"):
+        data["moods"][today_str] = mood
+        save(data)
+        st.success("Mood saved ✅")
 
 # MISSIONS
 elif choice == "🎮 Missions":
@@ -364,23 +316,21 @@ elif choice == "🎮 Missions":
     total = 0
     missed = []
     completed = []
+    category_scores = {}
 
     locked = today_str in data.get("locked_days", [])
 
-    workout_tasks = [
-        "Walking (40min) 🚶",
-        "Exercise (30min) 🏋️",
-        "Kegel Exercise 🧠",
-        "Breathing 🌬️"
-    ]
-
+    workout_tasks = ["Walking (40min) 🚶", "Exercise (30min) 🏋️", "Kegel Exercise 🧠", "Breathing 🌬️"]
     workout_done = 0
 
     if locked:
         st.error("🔒 Today already FINAL SAVED! Editing disabled ❌")
 
+    saved_temp = data.get("temp_progress", {}).get(today_str, {})
+
     for g, tasks in task_groups.items():
         st.subheader(g)
+        group_done = 0
 
         for t in tasks:
             total += 1
@@ -388,25 +338,41 @@ elif choice == "🎮 Missions":
             if t in ["MA001", "PN002"]:
                 st.error("🚫 STRICT WARNING: Avoid this habit completely.")
 
+            key = f"task_{today_str}_{g}_{t}"
+            default_checked = saved_temp.get(t, False)
+
             checked = st.checkbox(
                 t,
-                key=f"task_{today_str}_{g}_{t}",
+                value=default_checked,
+                key=key,
                 disabled=locked
             )
 
+            if not locked:
+                data.setdefault("temp_progress", {}).setdefault(today_str, {})[t] = checked
+                save(data)
+
             if checked:
                 done += 1
+                group_done += 1
                 completed.append(t)
                 if t in workout_tasks:
                     workout_done += 1
             else:
                 missed.append(t)
 
+        category_scores[g] = int((group_done / len(tasks)) * 100) if tasks else 0
+
     missed = list(dict.fromkeys(missed))
     score = int((done / total) * 100) if total else 0
 
     st.progress(score / 100)
     st.write(f"Score: {score}%")
+
+    st.subheader("📌 Category Progress")
+    for g, s in category_scores.items():
+        st.write(f"{g}: {s}%")
+        st.progress(safe_progress(s / 100))
 
     if data.get("quote_mode", True):
         st.info(motivation(score))
@@ -433,6 +399,11 @@ elif choice == "🎮 Missions":
         st.session_state.temp_workout_done = workout_done
 
     st.markdown("---")
+    st.subheader("👀 Review Today Summary")
+    st.write(f"✅ Completed: {len(completed)}")
+    st.write(f"❌ Missed: {len(missed)}")
+    st.write(f"📊 Final Score Preview: {score}%")
+
     st.subheader("🔒 Final Submit")
 
     current_hour = datetime.now().hour
@@ -444,11 +415,7 @@ elif choice == "🎮 Missions":
         st.warning("⏰ Anti-cheat: Final save blocked after 11 PM.")
     else:
         st.write(f"🧠 Solve CAPTCHA: {st.session_state.captcha_q}")
-
-        captcha_input = st.text_input(
-            "Enter Answer",
-            key=f"captcha_input_{today_str}"
-        )
+        captcha_input = st.text_input("Enter Answer", key=f"captcha_input_{today_str}")
 
         if st.button("FINAL SAVE 💀", key="final_save_btn"):
             if captcha_input != st.session_state.captcha_ans:
@@ -475,6 +442,11 @@ elif choice == "🎮 Missions":
                 for t in final_missed:
                     penalty += task_xp.get(t, 5)
 
+                if data.get("difficulty") == "Soft":
+                    penalty = int(penalty * 0.5)
+                elif data.get("difficulty") == "Hard":
+                    penalty = int(penalty * 1.5)
+
                 data["xp"] -= penalty
                 data["points"] -= penalty
 
@@ -500,13 +472,11 @@ elif choice == "🎮 Missions":
                 data["best_streak"] = max(data["best_streak"], data["streak"])
 
                 save(data)
-
                 st.success("🔥 FINAL SAVE DONE! Locked for today 🔒")
 
-                if "captcha_q" in st.session_state:
-                    del st.session_state["captcha_q"]
-                if "captcha_ans" in st.session_state:
-                    del st.session_state["captcha_ans"]
+                for k in ["captcha_q", "captcha_ans"]:
+                    if k in st.session_state:
+                        del st.session_state[k]
 
                 st.rerun()
 
@@ -540,10 +510,7 @@ elif choice == "📊 Stats":
             last_7.append({"date": d, "score": history.get(d, 0)})
 
         st.subheader("📊 Weekly Report")
-        st.plotly_chart(
-            px.bar(last_7, x="date", y="score", title="Last 7 Days Score"),
-            use_container_width=True
-        )
+        st.plotly_chart(px.bar(last_7, x="date", y="score", title="Last 7 Days Score"), use_container_width=True)
 
         avg = sum(x["score"] for x in last_7) / 7
         best = max(last_7, key=lambda x: x["score"])
@@ -553,12 +520,20 @@ elif choice == "📊 Stats":
         st.write(f"🏆 Best Day: {best['date']} → {best['score']}%")
         st.write(f"⚠️ Worst Day: {worst['date']} → {worst['score']}%")
 
+        good_days = sum(1 for x in last_7 if x["score"] >= 80)
+        st.subheader("🎯 Weekly Goal")
+        st.write(f"80%+ Days This Week: {good_days}/5")
+        if good_days >= 5:
+            st.success("🔥 Weekly goal achieved!")
+
         today_score = history.get(today_str, 0)
         st.subheader("Daily Performance")
-        st.plotly_chart(px.pie(
-            values=[today_score, 100 - today_score],
-            names=["Completed", "Pending"]
-        ), use_container_width=True)
+        st.plotly_chart(px.pie(values=[today_score, 100 - today_score], names=["Completed", "Pending"]), use_container_width=True)
+
+        if data.get("moods"):
+            mood_rows = [{"date": d, "mood": m, "score": history.get(d, 0)} for d, m in data["moods"].items()]
+            st.subheader("😊 Mood Tracker")
+            st.table(mood_rows)
 
 # CALENDAR
 elif choice == "📅 Calendar":
@@ -581,13 +556,7 @@ elif choice == "📅 Calendar":
         else:
             status = "🔴 Poor"
 
-        days.append({
-            "Date": str(d),
-            "Day": d.strftime("%A"),
-            "Score": "-" if score is None else score,
-            "Status": status
-        })
-
+        days.append({"Date": str(d), "Day": d.strftime("%A"), "Score": "-" if score is None else score, "Status": status})
         d += timedelta(days=1)
 
     st.table(days)
@@ -601,17 +570,15 @@ elif choice == "📜 History":
     else:
         for d, s in sorted(data["history"].items(), reverse=True):
             st.markdown(f"<div class='card'>{d} - Score: {s}%</div>", unsafe_allow_html=True)
-
             if d in data["reasons"]:
                 r = data["reasons"][d]
                 st.write("Time:", r.get("time", ""))
-
                 for t, rs in r.get("tasks", {}).items():
                     st.write(f"{t} → {rs}")
 
 # REPORT
 elif choice == "📄 Report":
-    st.title("📄 Daily Report")
+    st.title("📄 Daily / Monthly Report")
 
     if today_str in data["history"]:
         score = data["history"][today_str]
@@ -637,17 +604,30 @@ Motivation:
             for t, r in reasons["tasks"].items():
                 report += f"{t} → {r}\n"
 
-        st.text_area("Report", report, height=350, key="report_area")
-        st.download_button("Download Report", report, f"report_{today_str}.txt", key="download_report")
+        st.text_area("Daily Report", report, height=350, key="report_area")
+        st.download_button("Download Daily Report", report, f"report_{today_str}.txt", key="download_report")
     else:
         st.warning("Today final save pannala. Report available after final save.")
+
+    st.subheader("📅 Monthly Report")
+    month_report = "Monthly Report\n\n"
+    month_scores = []
+    for d, s in sorted(data.get("history", {}).items()):
+        if d.startswith(today.strftime("%Y-%m")):
+            month_scores.append(s)
+            month_report += f"{d} → {s}%\n"
+
+    if month_scores:
+        month_report += f"\nAverage: {sum(month_scores)/len(month_scores):.1f}%"
+        st.download_button("Download Monthly Report", month_report, f"monthly_report_{today.strftime('%Y_%m')}.txt")
+    else:
+        st.info("This month no submitted data.")
 
 # DREAM
 elif choice == "🎯 Dream":
     st.title("🎯 Dream Progress")
 
     dream = st.text_input("Your Dream", value=data.get("dream", ""), key="dream_input")
-
     st.subheader("Dream Small Steps")
     new_step = st.text_input("Add dream step", key="new_dream_step")
 
@@ -679,8 +659,9 @@ elif choice == "🎯 Dream":
 elif choice == "🧑 Profile":
     st.title("🧑 Profile")
 
+    avatar_list = ["😎", "🔥", "👑", "💪", "🧠", "⚡"]
     name = st.text_input("Name", value=data["name"], key="profile_name")
-    avatar = st.selectbox("Avatar", ["😎", "🔥", "👑", "💪", "🧠", "⚡"], key="profile_avatar")
+    avatar = st.selectbox("Avatar", avatar_list, index=avatar_list.index(data["avatar"]) if data["avatar"] in avatar_list else 0, key="profile_avatar")
     dream = st.text_input("Dream", value=data.get("dream", ""), key="profile_dream")
 
     st.markdown(f"### Preview: {avatar} {name}")
@@ -693,7 +674,6 @@ elif choice == "🧑 Profile":
         st.success("Profile Saved ✅")
 
     st.subheader("🏆 Your Badges")
-
     if data["badges"]:
         for b in data["badges"]:
             st.write(f"🏅 {b}")
@@ -721,11 +701,119 @@ elif choice == "🏆 Badges":
 
     for lvl, (icon, name, reward) in BADGE_RULES.items():
         if name in data["badges"]:
-            st.markdown(f"""
-            <div class='card'>
-            <h2>{icon} {name} (Level {lvl})</h2>
-            <p style='color:lightgreen;'>UNLOCKED ✅</p>
-            <p>🎁 Reward Earned: +{reward}</p>
-            </div>
-            """, unsafe_allow_html=True)
-    
+            status = "UNLOCKED ✅"
+            color = "lightgreen"
+        else:
+            status = "LOCKED 🔒"
+            color = "orange"
+
+        st.markdown(f"""
+        <div class='card'>
+        <h2>{icon} {name} (Level {lvl})</h2>
+        <p style='color:{color};'>{status}</p>
+        <p>🎁 Reward: +{reward}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# SHOP
+elif choice == "🛒 Shop":
+    st.title("🛒 Rewards Shop")
+
+    shop = [
+        {"name": "🔥 Fire Theme", "cost": 300},
+        {"name": "👑 King Title", "cost": 500},
+        {"name": "💎 Diamond Avatar", "cost": 800},
+        {"name": "⚡ Beast Mode Tag", "cost": 1000}
+    ]
+
+    st.write(f"💰 Your Points: {data['points']}")
+
+    for item in shop:
+        bought = item["name"] in data.get("unlocked_shop", [])
+        col1, col2 = st.columns([3, 1])
+        col1.write(f"{item['name']} — {item['cost']} points")
+
+        if bought:
+            col2.success("Unlocked")
+        else:
+            if col2.button("Buy", key=f"buy_{item['name']}"):
+                if data["points"] >= item["cost"]:
+                    data["points"] -= item["cost"]
+                    data.setdefault("unlocked_shop", []).append(item["name"])
+                    save(data)
+                    st.success("Purchased ✅")
+                    st.rerun()
+                else:
+                    st.error("Not enough points ❌")
+
+# SETTINGS
+elif choice == "⚙️ Settings":
+    st.title("⚙️ Settings")
+
+    st.subheader("🎨 Theme Settings")
+    theme = st.selectbox("Theme", ["Dark", "Light", "Purple", "Green"], index=["Dark", "Light", "Purple", "Green"].index(data.get("theme", "Dark")))
+    quote_mode = st.toggle("Motivation Quote ON/OFF", value=data.get("quote_mode", True))
+    mobile_nav = st.toggle("Mobile Friendly Navigation", value=data.get("mobile_nav", False))
+    difficulty = st.selectbox("Penalty Mode", ["Soft", "Normal", "Hard"], index=["Soft", "Normal", "Hard"].index(data.get("difficulty", "Normal")))
+
+    if st.button("Save Settings"):
+        data["theme"] = theme
+        data["quote_mode"] = quote_mode
+        data["mobile_nav"] = mobile_nav
+        data["difficulty"] = difficulty
+        save(data)
+        st.success("Settings saved ✅")
+        st.rerun()
+
+    st.markdown("---")
+    st.subheader("➕ Custom Tasks")
+
+    new_task = st.text_input("New Custom Task")
+    new_task_xp = st.number_input("Task XP", min_value=1, max_value=100, value=10)
+
+    if st.button("Add Custom Task"):
+        if new_task.strip():
+            data["custom_tasks"].append(new_task.strip())
+            data["custom_task_xp"][new_task.strip()] = int(new_task_xp)
+            save(data)
+            st.success("Custom task added ✅")
+            st.rerun()
+
+    if data.get("custom_tasks"):
+        for i, t in enumerate(data["custom_tasks"]):
+            col1, col2 = st.columns([4, 1])
+            col1.write(f"{t} — XP: {data.get('custom_task_xp', {}).get(t, 5)}")
+            if col2.button("Remove", key=f"remove_custom_{i}"):
+                data["custom_task_xp"].pop(t, None)
+                data["custom_tasks"].pop(i)
+                save(data)
+                st.rerun()
+
+    st.markdown("---")
+    st.subheader("💾 Backup / Restore")
+
+    backup_json = json.dumps(data, indent=2)
+    st.download_button("Download Backup data.json", backup_json, "data_backup.json", "application/json")
+
+    uploaded = st.file_uploader("Restore Backup JSON", type=["json"])
+    if uploaded is not None:
+        try:
+            restored = json.load(uploaded)
+            if st.button("Confirm Restore"):
+                save(restored)
+                st.success("Backup restored ✅")
+                st.rerun()
+        except:
+            st.error("Invalid JSON file ❌")
+
+    st.markdown("---")
+    st.subheader("🚨 Reset Data")
+
+    reset_input = st.text_input("Enter reset password", type="password")
+    if st.button("RESET ALL DATA"):
+        if reset_input == RESET_PASS:
+            save(default_data())
+            st.success("All data reset ✅")
+            st.rerun()
+        else:
+            st.error("Wrong reset password ❌")
