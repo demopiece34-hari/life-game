@@ -41,7 +41,22 @@ def default_data():
         "temp_progress": {},
         "weekly_goals": {},
         "shop_items": [],
-        "unlocked_shop": []
+        "unlocked_shop": [],
+
+        # NEW UPGRADE
+        "control_tracker": {
+            "MA001": {"fail_count": 0, "best_clean": 0, "current_clean": 0, "last_fail": ""},
+            "PN002": {"fail_count": 0, "best_clean": 0, "current_clean": 0, "last_fail": ""}
+        },
+        "water_logs": {},
+        "money": {
+            "balance": 0,
+            "income": [],
+            "expense": []
+        },
+        "punishments": {},
+        "punishment_done": {},
+        "life_wheel": {}
     }
 
 
@@ -49,6 +64,7 @@ def load():
     base = default_data()
     if not os.path.exists(DATA_FILE):
         return base
+
     try:
         with open(DATA_FILE, "r") as f:
             data = json.load(f)
@@ -58,6 +74,7 @@ def load():
     for k in base:
         if k not in data:
             data[k] = base[k]
+
     return data
 
 
@@ -230,6 +247,10 @@ menu = [
     "🧑 Profile",
     "🏆 Badges",
     "🛒 Shop",
+    "🚫 Control Tracker",
+    "💧 Water Tracker",
+    "💸 Money Tracker",
+    "⚖️ Life Wheel",
     "⚙️ Settings"
 ]
 
@@ -255,6 +276,9 @@ if data.get("custom_tasks"):
 if data.get("dream_steps"):
     task_groups["Dream Steps 🎯"] = data["dream_steps"]
 
+if today_str in data.get("punishments", {}) and not data.get("punishment_done", {}).get(today_str, False):
+    task_groups["Punishment Mission ⚠️"] = data["punishments"][today_str]
+
 if weekday == "Saturday":
     task_groups["Weekend"] = ["Movie 🎬"]
 
@@ -269,7 +293,12 @@ task_xp = {
     "Water 2L 🌊": 10, "No Junk Food 🌮": 20,
     "Instagram (20min)": 5, "YouTube (20min)": 5,
     "Movie 🎬": 5, "Oil Bath 🛁": 5,
-    "MA001": 30, "PN002": 30
+    "MA001": 30, "PN002": 30,
+    "Extra Study 30min 📚": 30,
+    "Extra Study 1hr 🔥": 60,
+    "Clean Room 🧹": 20,
+    "No Social Media Today 🚫": 40,
+    "Write Self Review ✍️": 20
 }
 task_xp.update(data.get("custom_task_xp", {}))
 
@@ -277,14 +306,20 @@ task_xp.update(data.get("custom_task_xp", {}))
 if choice == "🏠 Dashboard":
     st.title("🎯 LIFE GAME")
 
-    col1, col2, col3, col4 = st.columns(4)
+    money_balance = data.get("money", {}).get("balance", 0)
+
+    col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("🔥 XP", data["xp"])
     col2.metric("💰 Points", data["points"])
     col3.metric("⚡ Streak", data["streak"])
     col4.metric("🏆 Best Streak", data["best_streak"])
+    col5.metric("💸 Money", f"₹{money_balance}")
 
     if today_str not in data.get("history", {}):
         st.warning("⚠️ Today final submit pending!")
+
+    if today_str in data.get("punishments", {}) and not data.get("punishment_done", {}).get(today_str, False):
+        st.error("⚠️ Punishment mission pending! Finish it in Missions page.")
 
     st.markdown(f"""
     <div class='card'>
@@ -319,12 +354,15 @@ elif choice == "🎮 Missions":
     category_scores = {}
 
     locked = today_str in data.get("locked_days", [])
-
     workout_tasks = ["Walking (40min) 🚶", "Exercise (30min) 🏋️", "Kegel Exercise 🧠", "Breathing 🌬️"]
     workout_done = 0
+    punishment_tasks_today = data.get("punishments", {}).get(today_str, [])
 
     if locked:
         st.error("🔒 Today already FINAL SAVED! Editing disabled ❌")
+
+    if punishment_tasks_today and not data.get("punishment_done", {}).get(today_str, False):
+        st.warning("⚠️ Punishment mission irukku. Idha complete pannina thaan proper discipline maintain aagum.")
 
     saved_temp = data.get("temp_progress", {}).get(today_str, {})
 
@@ -338,15 +376,13 @@ elif choice == "🎮 Missions":
             if t in ["MA001", "PN002"]:
                 st.error("🚫 STRICT WARNING: Avoid this habit completely.")
 
+            if g == "Punishment Mission ⚠️":
+                st.warning(f"⚠️ Punishment Task: {t}")
+
             key = f"task_{today_str}_{g}_{t}"
             default_checked = saved_temp.get(t, False)
 
-            checked = st.checkbox(
-                t,
-                value=default_checked,
-                key=key,
-                disabled=locked
-            )
+            checked = st.checkbox(t, value=default_checked, key=key, disabled=locked)
 
             if not locked:
                 data.setdefault("temp_progress", {}).setdefault(today_str, {})[t] = checked
@@ -382,11 +418,7 @@ elif choice == "🎮 Missions":
     if missed:
         st.subheader("Missed Reasons")
         for i, t in enumerate(missed):
-            r = st.text_input(
-                f"{t}",
-                key=f"reason_input_{today_str}_{i}_{t}",
-                disabled=locked
-            )
+            r = st.text_input(f"{t}", key=f"reason_input_{today_str}_{i}_{t}", disabled=locked)
             if r:
                 reasons_today[t] = r
 
@@ -426,6 +458,16 @@ elif choice == "🎮 Missions":
                 final_reasons = st.session_state.get("temp_reasons", reasons_today)
                 final_workout_done = st.session_state.get("temp_workout_done", workout_done)
 
+                punishment_pending = False
+                if punishment_tasks_today:
+                    for pt in punishment_tasks_today:
+                        if pt in final_missed:
+                            punishment_pending = True
+
+                if punishment_pending:
+                    st.error("⚠️ Punishment mission complete pannama final save panna mudiyathu.")
+                    st.stop()
+
                 data["history"][today_str] = final_score
                 data["xp"] += final_score
                 data["points"] += final_score
@@ -450,12 +492,42 @@ elif choice == "🎮 Missions":
                 data["xp"] -= penalty
                 data["points"] -= penalty
 
-                if "MA001" not in final_missed:
-                    data["xp"] += 30
-                    data["points"] += 30
-                else:
-                    data["xp"] -= 30
-                    data["points"] -= 30
+                # Control tracker + punishment generator
+                tomorrow_str = str(today + timedelta(days=1))
+                data.setdefault("control_tracker", default_data()["control_tracker"])
+
+                for bad_task in ["MA001", "PN002"]:
+                    if bad_task in final_missed:
+                        data["control_tracker"][bad_task]["current_clean"] += 1
+                        data["control_tracker"][bad_task]["best_clean"] = max(
+                            data["control_tracker"][bad_task]["best_clean"],
+                            data["control_tracker"][bad_task]["current_clean"]
+                        )
+                        data["xp"] += 30
+                        data["points"] += 30
+                    else:
+                        data["control_tracker"][bad_task]["fail_count"] += 1
+                        data["control_tracker"][bad_task]["current_clean"] = 0
+                        data["control_tracker"][bad_task]["last_fail"] = today_str
+                        data["xp"] -= 50
+                        data["points"] -= 50
+
+                        data.setdefault("punishments", {})
+                        data["punishments"].setdefault(tomorrow_str, [])
+
+                        if bad_task == "MA001":
+                            extra = ["Extra Study 1hr 🔥", "Write Self Review ✍️", "No Social Media Today 🚫"]
+                        else:
+                            extra = ["Extra Study 30min 📚", "Clean Room 🧹", "Write Self Review ✍️"]
+
+                        for e in extra:
+                            if e not in data["punishments"][tomorrow_str]:
+                                data["punishments"][tomorrow_str].append(e)
+
+                if punishment_tasks_today:
+                    data.setdefault("punishment_done", {})[today_str] = True
+                    data["xp"] += 50
+                    data["points"] += 50
 
                 data["xp"] = max(0, data["xp"])
                 data["points"] = max(0, data["points"])
@@ -520,20 +592,9 @@ elif choice == "📊 Stats":
         st.write(f"🏆 Best Day: {best['date']} → {best['score']}%")
         st.write(f"⚠️ Worst Day: {worst['date']} → {worst['score']}%")
 
-        good_days = sum(1 for x in last_7 if x["score"] >= 80)
-        st.subheader("🎯 Weekly Goal")
-        st.write(f"80%+ Days This Week: {good_days}/5")
-        if good_days >= 5:
-            st.success("🔥 Weekly goal achieved!")
-
         today_score = history.get(today_str, 0)
         st.subheader("Daily Performance")
         st.plotly_chart(px.pie(values=[today_score, 100 - today_score], names=["Completed", "Pending"]), use_container_width=True)
-
-        if data.get("moods"):
-            mood_rows = [{"date": d, "mood": m, "score": history.get(d, 0)} for d, m in data["moods"].items()]
-            st.subheader("😊 Mood Tracker")
-            st.table(mood_rows)
 
 # CALENDAR
 elif choice == "📅 Calendar":
@@ -673,24 +734,9 @@ elif choice == "🧑 Profile":
         save(data)
         st.success("Profile Saved ✅")
 
-    st.subheader("🏆 Your Badges")
-    if data["badges"]:
-        for b in data["badges"]:
-            st.write(f"🏅 {b}")
-    else:
-        st.write("No badges unlocked yet 🔒")
-
     st.subheader("🔥 XP Progress")
     st.write(f"Total XP: {data['xp']}")
     st.progress(safe_progress(max(0, data["xp"]) / 1000))
-
-    st.markdown("---")
-    st.subheader("📅 Progress Info")
-    st.write(f"🔥 Total Days Tracked: {len(data.get('history', {}))}")
-    st.write(f"🔒 Locked Days: {len(data.get('locked_days', []))}")
-    st.write(f"⏳ Remaining Days: {365 - len(data.get('history', {}))}")
-    st.write(f"⚡ Current Streak: {data['streak']}")
-    st.write(f"🏆 Best Streak: {data['best_streak']}")
 
 # BADGES
 elif choice == "🏆 Badges":
@@ -700,12 +746,8 @@ elif choice == "🏆 Badges":
         st.warning("🔒 All badges are LOCKED. Level up to unlock!")
 
     for lvl, (icon, name, reward) in BADGE_RULES.items():
-        if name in data["badges"]:
-            status = "UNLOCKED ✅"
-            color = "lightgreen"
-        else:
-            status = "LOCKED 🔒"
-            color = "orange"
+        status = "UNLOCKED ✅" if name in data["badges"] else "LOCKED 🔒"
+        color = "lightgreen" if name in data["badges"] else "orange"
 
         st.markdown(f"""
         <div class='card'>
@@ -745,6 +787,168 @@ elif choice == "🛒 Shop":
                     st.rerun()
                 else:
                     st.error("Not enough points ❌")
+
+# CONTROL TRACKER
+elif choice == "🚫 Control Tracker":
+    st.title("🚫 Control Tracker")
+
+    st.info("MA001 / PN002 control progress inga track aagum.")
+
+    for habit, info in data.get("control_tracker", {}).items():
+        st.markdown(f"""
+        <div class='card'>
+        <h2>{habit}</h2>
+        <p>🔥 Current Clean Streak: {info.get("current_clean", 0)} days</p>
+        <p>🏆 Best Clean Streak: {info.get("best_clean", 0)} days</p>
+        <p>❌ Fail Count: {info.get("fail_count", 0)}</p>
+        <p>📅 Last Fail: {info.get("last_fail", "Never")}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.subheader("⚠️ Pending Punishments")
+    pending = False
+    for d, tasks in data.get("punishments", {}).items():
+        if not data.get("punishment_done", {}).get(d, False):
+            pending = True
+            st.warning(f"{d}: {', '.join(tasks)}")
+
+    if not pending:
+        st.success("No pending punishment missions ✅")
+
+# WATER TRACKER
+elif choice == "💧 Water Tracker":
+    st.title("💧 Advanced Water Tracker")
+
+    data.setdefault("water_logs", {})
+    data["water_logs"].setdefault(today_str, 0)
+
+    goal = 8
+    current_glass = data["water_logs"][today_str]
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Today Glass", current_glass)
+    col2.metric("Goal", goal)
+    col3.metric("Progress", f"{int((current_glass / goal) * 100)}%")
+
+    st.progress(safe_progress(current_glass / goal))
+
+    c1, c2 = st.columns(2)
+    if c1.button("➕ Add 1 Glass"):
+        data["water_logs"][today_str] += 1
+        save(data)
+        st.rerun()
+
+    if c2.button("➖ Remove 1 Glass"):
+        data["water_logs"][today_str] = max(0, data["water_logs"][today_str] - 1)
+        save(data)
+        st.rerun()
+
+    if data["water_logs"][today_str] >= goal:
+        st.success("💧 Water goal completed today!")
+
+    st.subheader("Last 7 Days Water")
+    water_rows = []
+    for i in range(6, -1, -1):
+        d = str(today - timedelta(days=i))
+        water_rows.append({"date": d, "glass": data["water_logs"].get(d, 0)})
+
+    st.plotly_chart(px.bar(water_rows, x="date", y="glass", title="Water Glass Count"), use_container_width=True)
+
+# MONEY TRACKER
+elif choice == "💸 Money Tracker":
+    st.title("💸 Money Tracker")
+
+    data.setdefault("money", {"balance": 0, "income": [], "expense": []})
+    money = data["money"]
+
+    total_income = sum(x["amount"] for x in money.get("income", []))
+    total_expense = sum(x["amount"] for x in money.get("expense", []))
+    balance = total_income - total_expense
+    money["balance"] = balance
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("💰 Total Income", f"₹{total_income}")
+    col2.metric("💸 Total Expense", f"₹{total_expense}")
+    col3.metric("🏦 Balance", f"₹{balance}")
+
+    st.markdown("---")
+    st.subheader("➕ Add Income")
+    inc_amount = st.number_input("Income Amount", min_value=0, value=0, key="inc_amount")
+    inc_note = st.text_input("Income Note", key="inc_note")
+    if st.button("Add Income"):
+        if inc_amount > 0:
+            money["income"].append({
+                "date": today_str,
+                "amount": int(inc_amount),
+                "note": inc_note
+            })
+            save(data)
+            st.success("Income added ✅")
+            st.rerun()
+
+    st.subheader("➖ Add Expense")
+    exp_amount = st.number_input("Expense Amount", min_value=0, value=0, key="exp_amount")
+    exp_note = st.text_input("Expense Note", key="exp_note")
+    if st.button("Add Expense"):
+        if exp_amount > 0:
+            money["expense"].append({
+                "date": today_str,
+                "amount": int(exp_amount),
+                "note": exp_note
+            })
+            save(data)
+            st.success("Expense added ✅")
+            st.rerun()
+
+    st.markdown("---")
+    st.subheader("📜 Money History")
+
+    rows = []
+    for x in money.get("income", []):
+        rows.append({"date": x["date"], "type": "Income", "amount": x["amount"], "note": x.get("note", "")})
+    for x in money.get("expense", []):
+        rows.append({"date": x["date"], "type": "Expense", "amount": x["amount"], "note": x.get("note", "")})
+
+    if rows:
+        st.table(sorted(rows, key=lambda x: x["date"], reverse=True))
+        st.plotly_chart(px.pie(rows, values="amount", names="type", title="Income vs Expense"), use_container_width=True)
+    else:
+        st.info("No money records yet.")
+
+# LIFE WHEEL
+elif choice == "⚖️ Life Wheel":
+    st.title("⚖️ Life Wheel Analysis")
+
+    st.info("Health, Study, Money, Mind, Discipline balance check panna use pannunga.")
+
+    categories = ["Health", "Study", "Money", "Mind", "Discipline", "Dream", "Family", "Fitness"]
+
+    data.setdefault("life_wheel", {})
+    today_wheel = data["life_wheel"].get(today_str, {})
+
+    new_scores = {}
+    for c in categories:
+        new_scores[c] = st.slider(c, 0, 10, int(today_wheel.get(c, 5)))
+
+    if st.button("Save Life Wheel"):
+        data["life_wheel"][today_str] = new_scores
+        save(data)
+        st.success("Life wheel saved ✅")
+        st.rerun()
+
+    if data.get("life_wheel"):
+        latest_date = sorted(data["life_wheel"].keys())[-1]
+        latest_scores = data["life_wheel"][latest_date]
+        rows = [{"Area": k, "Score": v} for k, v in latest_scores.items()]
+
+        st.subheader(f"Latest Analysis: {latest_date}")
+        st.plotly_chart(px.line_polar(rows, r="Score", theta="Area", line_close=True, title="Life Balance Wheel"), use_container_width=True)
+
+        weak = min(rows, key=lambda x: x["Score"])
+        strong = max(rows, key=lambda x: x["Score"])
+
+        st.warning(f"⚠️ Weak Area: {weak['Area']} → {weak['Score']}/10")
+        st.success(f"🔥 Strong Area: {strong['Area']} → {strong['Score']}/10")
 
 # SETTINGS
 elif choice == "⚙️ Settings":
@@ -809,11 +1013,23 @@ elif choice == "⚙️ Settings":
     st.markdown("---")
     st.subheader("🚨 Reset Data")
 
+    st.warning("Money reset separate checkbox irukku. Tick pannalana money data safe ah irukkum.")
+
     reset_input = st.text_input("Enter reset password", type="password")
+    reset_money = st.checkbox("Also reset Money Tracker data")
+
     if st.button("RESET ALL DATA"):
         if reset_input == RESET_PASS:
-            save(default_data())
-            st.success("All data reset ✅")
+            old_money = data.get("money", {"balance": 0, "income": [], "expense": []})
+            new_data = default_data()
+
+            if not reset_money:
+                new_data["money"] = old_money
+
+            save(new_data)
+            st.success("Data reset completed ✅")
+            if not reset_money:
+                st.info("Money data reset agala. Safe ah irukku ✅")
             st.rerun()
         else:
             st.error("Wrong reset password ❌")
