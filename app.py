@@ -360,76 +360,76 @@ if not challenge.get("unlocked_main_game", False):
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div class="challenge-wrap">
+st.markdown(f"""
+<div class="challenge-wrap">
 
-    <div>
-        <div class="hero-card">
-            <h1 class="glow-title">🔥 60 DAYS HARD RESET CHALLENGE</h1>
+<div>
+<div class="hero-card">
+<h1 class="glow-title">🔥 60 DAYS HARD RESET CHALLENGE</h1>
 
-            <div class="stat-grid">
-                <div class="stat-box">
-                    <h3>DAY</h3>
-                    <h1>{current_day} / 60</h1>
-                    <p>{days_left} Days Left</p>
-                </div>
+<div class="stat-grid">
+<div class="stat-box">
+<h3>DAY</h3>
+<h1>{current_day} / 60</h1>
+<p>{days_left} Days Left</p>
+</div>
 
-                <div class="stat-box">
-                    <h3>XP TODAY</h3>
-                    <h1>100 XP</h1>
-                    <p>Daily Reward</p>
-                </div>
+<div class="stat-box">
+<h3>XP TODAY</h3>
+<h1>100 XP</h1>
+<p>Daily Reward</p>
+</div>
 
-                <div class="stat-box">
-                    <h3>STREAK</h3>
-                    <h1>{completed_count} Days</h1>
-                    <p>Keep it up</p>
-                </div>
+<div class="stat-box">
+<h3>STREAK</h3>
+<h1>{completed_count} Days</h1>
+<p>Keep it up</p>
+</div>
 
-                <div class="stat-box">
-                    <h3>STATUS</h3>
-                    <h2>{coach_mode}</h2>
-                    <p>{coach_msg}</p>
-                </div>
-            </div>
+<div class="stat-box">
+<h3>STATUS</h3>
+<h2>{coach_mode}</h2>
+<p>{coach_msg}</p>
+</div>
+</div>
 
-            <div class="warning-box">
-                <h2>⚠️ ONE TASK MISS = RESET TO DAY 1</h2>
-                <p>No excuses. Only results.</p>
-            </div>
+<div class="warning-box">
+<h2>⚠️ ONE TASK MISS = RESET TO DAY 1</h2>
+<p>No excuses. Only results.</p>
+</div>
 
-            <h2>🎯 TODAY'S TASKS</h2>
-            <p>Complete all tasks and press FINAL SUBMIT.</p>
+<h2>🎯 TODAY'S TASKS</h2>
+<p>Complete all tasks and press FINAL SUBMIT.</p>
 
-            <div style="background:rgba(255,255,255,0.08);border-radius:20px;padding:16px;margin-top:20px;">
-                <h3>📊 60 Days Progress</h3>
-                <div style="background:#334155;border-radius:20px;height:18px;">
-                    <div style="background:linear-gradient(90deg,#22c55e,#84cc16);width:{progress_percent}%;height:18px;border-radius:20px;"></div>
-                </div>
-                <p>{progress_percent}% completed</p>
-            </div>
-        </div>
-    </div>
+<div style="background:rgba(255,255,255,0.08);border-radius:20px;padding:16px;margin-top:20px;">
+<h3>📊 60 Days Progress</h3>
+<div style="background:#334155;border-radius:20px;height:18px;">
+<div style="background:linear-gradient(90deg,#22c55e,#84cc16);width:{progress_percent}%;height:18px;border-radius:20px;"></div>
+</div>
+<p>{progress_percent}% completed</p>
+</div>
+</div>
+</div>
 
-    <div class="coach-panel">
-        <h2>🤖 AI COACH</h2>
-        <div class="coach-avatar">{coach_face}</div>
-        <h3 style="text-align:center;color:#22c55e;">{coach_mode}</h3>
+<div class="coach-panel">
+<h2>🤖 AI COACH</h2>
+<div class="coach-avatar">{coach_face}</div>
+<h3 style="text-align:center;color:#22c55e;">{coach_mode}</h3>
 
-        <div class="coach-bubble">
-            <b>Hey KING 🔥</b><br>
-            Day {current_day} complete panna one step closer to main LIFE GAME.
-            Focus pannunga. Consistency dhaan power.
-        </div>
+<div class="coach-bubble">
+<b>Hey KING 🔥</b><br>
+Day {current_day} complete panna one step closer to main LIFE GAME.
+Focus pannunga. Consistency dhaan power.
+</div>
 
-        <div class="coach-bubble">
-            <b>Reminder:</b><br>
-            One task miss panna reset. So today full complete pannunga.
-        </div>
-    </div>
+<div class="coach-bubble">
+<b>Reminder:</b><br>
+One task miss panna reset. So today full complete pannunga.
+</div>
+</div>
 
-    </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
     st.warning("""
 ⚠️ STRICT RULES
