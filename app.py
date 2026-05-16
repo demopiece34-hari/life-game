@@ -237,6 +237,56 @@ if not challenge.get("unlocked_main_game", False):
         st.rerun()
 
     st.subheader(f"DAY {current_day} / 60")
+    st.markdown("""
+    <div style="
+    padding:25px;
+    border-radius:25px;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+    margin-bottom:20px;
+    box-shadow:0 0 25px rgba(99,102,241,0.5);
+    animation: fade 1s;
+    ">
+
+    <h1 style="text-align:center;color:#22c55e;">
+    🔥 60 DAYS HARD RESET 🔥
+    </h1>
+
+    <h3 style="text-align:center;">
+    YOUR LIFE CAN CHANGE IN 60 DAYS
+    </h3>
+
+    <hr>
+
+    <h2>🚀 AFTER 60 DAYS:</h2>
+
+    <ul style="font-size:18px;line-height:2;">
+    <li>🧠 Brain fog reduce aagum</li>
+    <li>⚡ Energy increase aagum</li>
+    <li>💪 Body strong aagum</li>
+    <li>🔥 Confidence improve aagum</li>
+    <li>📚 Focus & concentration improve aagum</li>
+    <li>😴 Better sleep cycle</li>
+    <li>🚫 Addiction control increase</li>
+    <li>📱 Social media dependency reduce</li>
+    <li>🎯 Discipline level high aagum</li>
+    <li>👑 Self respect improve aagum</li>
+    <li>⚡ Dopamine balance improve aagum</li>
+    <li>🏆 Main LIFE GAME unlock aagum</li>
+    </ul>
+
+    <hr>
+
+    <h2 style="text-align:center;color:#facc15;">
+    ⚠️ ONE MISS = RESET TO DAY 1
+    </h2>
+
+    <p style="text-align:center;font-size:20px;">
+    🔥 ONLY REAL DISCIPLINE PEOPLE CAN COMPLETE THIS
+    </p>
+
+    </div>
+    """, unsafe_allow_html=True)
 
     st.warning("""
 ⚠️ STRICT RULES
