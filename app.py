@@ -166,6 +166,145 @@ data = load()
 today = date.today()
 today_str = str(today)
 
+# =========================
+# 60 DAYS HARD RESET MODE
+# Add this AFTER:
+# today_str = str(today)
+# =========================
+
+data.setdefault("challenge_60", {
+    "enabled": True,
+    "start_date": today_str,
+    "day": 1,
+    "completed_days": [],
+    "failed": False,
+    "unlocked_main_game": False
+})
+
+challenge = data["challenge_60"]
+
+challenge_tasks = [
+    "No Porn 🚫",
+    "No Masturbation 🚫",
+    "Instagram Only 8min ⏳",
+    "YouTube Only 8min ⏳",
+    "Workout 10min 💪",
+    "Wake Up 6:00 AM ⏰",
+    "10 Pushups 🔥",
+    "Breathing 3min 🌬️",
+    "Reading 20min 📚"
+]
+
+# =========================
+# MAIN LOCK SYSTEM
+# =========================
+
+if not challenge.get("unlocked_main_game", False):
+
+    st.title("🔥 60 DAYS HARD RESET")
+
+    completed_days = challenge.get("completed_days", [])
+
+    current_day = len(completed_days) + 1
+
+    if current_day > 60:
+        challenge["unlocked_main_game"] = True
+        save(data)
+        st.success("🔥 60 DAYS COMPLETED")
+        st.balloons()
+        st.rerun()
+
+    st.subheader(f"DAY {current_day} / 60")
+
+    st.warning("""
+⚠️ STRICT RULES
+
+❌ One task miss panna...
+❌ One bad habit break panna...
+❌ One day skip panna...
+
+🔥 FULL RESET TO DAY 1
+""")
+
+    day_key = f"challenge_day_{today_str}"
+
+    data.setdefault("challenge_progress", {})
+    data["challenge_progress"].setdefault(day_key, {})
+
+    done = 0
+
+    for task in challenge_tasks:
+
+        checked = st.checkbox(
+            task,
+            value=data["challenge_progress"][day_key].get(task, False),
+            key=f"challenge_{today_str}_{task}"
+        )
+
+        data["challenge_progress"][day_key][task] = checked
+
+        if checked:
+            done += 1
+
+    progress = int((done / len(challenge_tasks)) * 100)
+
+    st.progress(progress / 100)
+    st.write(f"Today's Progress: {progress}%")
+
+    save(data)
+
+    # =========================
+    # FINAL SUBMIT
+    # =========================
+
+    if st.button("FINAL SUBMIT 🔒"):
+
+        all_done = all(
+            data["challenge_progress"][day_key].get(t, False)
+            for t in challenge_tasks
+        )
+
+        if not all_done:
+
+            st.error("""
+❌ TASK MISSED
+
+🔥 FULL RESET STARTED
+Back to DAY 1
+""")
+
+            challenge["completed_days"] = []
+            challenge["day"] = 1
+            challenge["failed"] = True
+
+            save(data)
+            st.stop()
+
+        else:
+
+            if today_str not in challenge["completed_days"]:
+                challenge["completed_days"].append(today_str)
+
+            challenge["day"] = len(challenge["completed_days"]) + 1
+            challenge["failed"] = False
+
+            # REWARD
+            data["xp"] += 100
+            data["points"] += 100
+
+            save(data)
+
+            st.success(f"""
+🔥 DAY {current_day} COMPLETED
+
+⚡ Stay focused.
+🏆 60 days complete panna main game unlock aagum.
+""")
+
+            st.rerun()
+
+    st.stop()
+
 data["streak"] = compute_streak(data.get("history", {}))
 data["best_streak"] = max(data.get("best_streak", 0), data["streak"])
 save(data)
