@@ -187,11 +187,9 @@ if not st.session_state.login:
         else:
             st.error("Wrong credentials 🔗")
     st.stop()
-
 # =========================
 # 60 DAYS HARD RESET MODE
-# Add this AFTER:
-# today_str = str(today)
+# Login block ku keela, # CAPTCHA ku mela paste pannunga
 # =========================
 
 data.setdefault("challenge_60", {
@@ -217,16 +215,29 @@ challenge_tasks = [
     "Reading 20min 📚"
 ]
 
-# =========================
-# MAIN LOCK SYSTEM
-# =========================
+def coach_reply(q, current_day):
+    q = q.lower()
+
+    if "instagram" in q:
+        return "📵 Instagram 8 minutes mattum. Timer set panni use pannunga."
+    elif "youtube" in q:
+        return "▶️ YouTube 8 minutes mattum. Shorts avoid pannunga."
+    elif "miss" in q or "fail" in q:
+        return "⚠️ One task miss na Day 1 reset. But restart panna defeat illa, discipline training."
+    elif "workout" in q or "pushup" in q:
+        return "💪 10 mins workout + 10 pushups daily. Small consistency dhaan big change."
+    elif "reading" in q:
+        return "📚 20 minutes reading phone away vechu silent place la pannunga."
+    elif "motivation" in q:
+        return "🔥 Today win pannina future version strong aagum. One day at a time."
+    elif "60" in q or "day" in q:
+        return f"🔥 Ippo Day {current_day}/60. 60 days complete panna main LIFE GAME unlock aagum."
+    else:
+        return "🧠 Rule simple: daily all tasks complete pannu. One task miss na reset."
 
 if not challenge.get("unlocked_main_game", False):
 
-    st.title("🔥 60 DAYS HARD RESET")
-
     completed_days = challenge.get("completed_days", [])
-
     current_day = len(completed_days) + 1
 
     if current_day > 60:
@@ -236,54 +247,186 @@ if not challenge.get("unlocked_main_game", False):
         st.balloons()
         st.rerun()
 
-    st.subheader(f"DAY {current_day} / 60")
+    completed_count = len(completed_days)
+    days_left = 60 - completed_count
+    progress_percent = int((completed_count / 60) * 100)
+
+    if current_day <= 10:
+        coach_face = "🙂"
+        coach_mode = "STARTER MODE"
+        coach_msg = "Start strong. Small discipline daily big change."
+    elif current_day <= 30:
+        coach_face = "😎"
+        coach_mode = "WARRIOR MODE"
+        coach_msg = "Good progress. Don’t break the streak."
+    elif current_day <= 50:
+        coach_face = "🔥"
+        coach_mode = "BEAST MODE"
+        coach_msg = "You are becoming stronger. Stay locked in."
+    else:
+        coach_face = "👑"
+        coach_mode = "GOD MODE LOADING"
+        coach_msg = "Final stage. Main LIFE GAME is near."
+
     st.markdown("""
-    <div style="
-    padding:25px;
-    border-radius:25px;
-    background:linear-gradient(135deg,#0f172a,#1e293b);
-    color:white;
-    margin-bottom:20px;
-    box-shadow:0 0 25px rgba(99,102,241,0.5);
-    animation: fade 1s;
-    ">
+    <style>
+    .challenge-wrap {
+        display: grid;
+        grid-template-columns: 1fr 330px;
+        gap: 22px;
+    }
+    .hero-card {
+        background: linear-gradient(135deg,#020617,#0f172a,#1e1b4b);
+        border: 1px solid rgba(99,102,241,0.4);
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 0 35px rgba(99,102,241,0.35);
+        animation: fadeUp 0.8s ease;
+        color: white;
+    }
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 14px;
+    }
+    .stat-box {
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 18px;
+        padding: 18px;
+        text-align: center;
+    }
+    .warning-box {
+        background: linear-gradient(135deg,rgba(127,29,29,0.7),rgba(30,41,59,0.5));
+        border: 1px solid #ef4444;
+        color: white;
+        padding: 18px;
+        border-radius: 18px;
+        text-align: center;
+        margin: 20px 0;
+        animation: pulseRed 1.8s infinite;
+    }
+    .coach-panel {
+        position: sticky;
+        top: 20px;
+        background: linear-gradient(135deg,#020617,#082f49);
+        border: 1px solid rgba(34,197,94,0.45);
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: 0 0 35px rgba(34,197,94,0.30);
+        animation: fadeRight 0.9s ease;
+        color: white;
+    }
+    .coach-avatar {
+        font-size: 90px;
+        text-align: center;
+        animation: floatCoach 3s infinite ease-in-out;
+    }
+    .coach-bubble {
+        background: rgba(14,165,233,0.14);
+        border: 1px solid rgba(56,189,248,0.35);
+        padding: 16px;
+        border-radius: 18px;
+        color: white;
+        margin-top: 12px;
+    }
+    .glow-title {
+        color: white;
+        text-shadow: 0 0 18px rgba(250,204,21,0.8);
+    }
+    @keyframes floatCoach {
+        0% {transform: translateY(0) scale(1);}
+        50% {transform: translateY(-14px) scale(1.05);}
+        100% {transform: translateY(0) scale(1);}
+    }
+    @keyframes pulseRed {
+        0% {box-shadow: 0 0 10px rgba(239,68,68,0.35);}
+        50% {box-shadow: 0 0 28px rgba(239,68,68,0.75);}
+        100% {box-shadow: 0 0 10px rgba(239,68,68,0.35);}
+    }
+    @keyframes fadeUp {
+        from {opacity:0; transform:translateY(25px);}
+        to {opacity:1; transform:translateY(0);}
+    }
+    @keyframes fadeRight {
+        from {opacity:0; transform:translateX(30px);}
+        to {opacity:1; transform:translateX(0);}
+    }
+    @media(max-width:900px){
+        .challenge-wrap {grid-template-columns: 1fr;}
+        .stat-grid {grid-template-columns: repeat(2,1fr);}
+        .coach-panel {position: relative; top: 0;}
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    <h1 style="text-align:center;color:#22c55e;">
-    🔥 60 DAYS HARD RESET 🔥
-    </h1>
+    st.markdown(f"""
+    <div class="challenge-wrap">
 
-    <h3 style="text-align:center;">
-    YOUR LIFE CAN CHANGE IN 60 DAYS
-    </h3>
+    <div>
+        <div class="hero-card">
+            <h1 class="glow-title">🔥 60 DAYS HARD RESET CHALLENGE</h1>
 
-    <hr>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <h3>DAY</h3>
+                    <h1>{current_day} / 60</h1>
+                    <p>{days_left} Days Left</p>
+                </div>
 
-    <h2>🚀 AFTER 60 DAYS:</h2>
+                <div class="stat-box">
+                    <h3>XP TODAY</h3>
+                    <h1>100 XP</h1>
+                    <p>Daily Reward</p>
+                </div>
 
-    <ul style="font-size:18px;line-height:2;">
-    <li>🧠 Brain fog reduce aagum</li>
-    <li>⚡ Energy increase aagum</li>
-    <li>💪 Body strong aagum</li>
-    <li>🔥 Confidence improve aagum</li>
-    <li>📚 Focus & concentration improve aagum</li>
-    <li>😴 Better sleep cycle</li>
-    <li>🚫 Addiction control increase</li>
-    <li>📱 Social media dependency reduce</li>
-    <li>🎯 Discipline level high aagum</li>
-    <li>👑 Self respect improve aagum</li>
-    <li>⚡ Dopamine balance improve aagum</li>
-    <li>🏆 Main LIFE GAME unlock aagum</li>
-    </ul>
+                <div class="stat-box">
+                    <h3>STREAK</h3>
+                    <h1>{completed_count} Days</h1>
+                    <p>Keep it up</p>
+                </div>
 
-    <hr>
+                <div class="stat-box">
+                    <h3>STATUS</h3>
+                    <h2>{coach_mode}</h2>
+                    <p>{coach_msg}</p>
+                </div>
+            </div>
 
-    <h2 style="text-align:center;color:#facc15;">
-    ⚠️ ONE MISS = RESET TO DAY 1
-    </h2>
+            <div class="warning-box">
+                <h2>⚠️ ONE TASK MISS = RESET TO DAY 1</h2>
+                <p>No excuses. Only results.</p>
+            </div>
 
-    <p style="text-align:center;font-size:20px;">
-    🔥 ONLY REAL DISCIPLINE PEOPLE CAN COMPLETE THIS
-    </p>
+            <h2>🎯 TODAY'S TASKS</h2>
+            <p>Complete all tasks and press FINAL SUBMIT.</p>
+
+            <div style="background:rgba(255,255,255,0.08);border-radius:20px;padding:16px;margin-top:20px;">
+                <h3>📊 60 Days Progress</h3>
+                <div style="background:#334155;border-radius:20px;height:18px;">
+                    <div style="background:linear-gradient(90deg,#22c55e,#84cc16);width:{progress_percent}%;height:18px;border-radius:20px;"></div>
+                </div>
+                <p>{progress_percent}% completed</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="coach-panel">
+        <h2>🤖 AI COACH</h2>
+        <div class="coach-avatar">{coach_face}</div>
+        <h3 style="text-align:center;color:#22c55e;">{coach_mode}</h3>
+
+        <div class="coach-bubble">
+            <b>Hey KING 🔥</b><br>
+            Day {current_day} complete panna one step closer to main LIFE GAME.
+            Focus pannunga. Consistency dhaan power.
+        </div>
+
+        <div class="coach-bubble">
+            <b>Reminder:</b><br>
+            One task miss panna reset. So today full complete pannunga.
+        </div>
+    </div>
 
     </div>
     """, unsafe_allow_html=True)
@@ -306,7 +449,6 @@ if not challenge.get("unlocked_main_game", False):
     done = 0
 
     for task in challenge_tasks:
-
         checked = st.checkbox(
             task,
             value=data["challenge_progress"][day_key].get(task, False),
@@ -318,16 +460,23 @@ if not challenge.get("unlocked_main_game", False):
         if checked:
             done += 1
 
-    progress = int((done / len(challenge_tasks)) * 100)
+    today_progress = int((done / len(challenge_tasks)) * 100)
 
-    st.progress(progress / 100)
-    st.write(f"Today's Progress: {progress}%")
+    st.progress(today_progress / 100)
+    st.write(f"Today's Progress: {today_progress}%")
+
+    st.markdown("---")
+    st.subheader("🤖 Ask AI Coach")
+
+    doubt = st.text_input("60 days challenge doubt type pannunga", key=f"coach_doubt_{today_str}")
+
+    if st.button("Ask Coach 🤖", key=f"ask_coach_{today_str}"):
+        if doubt.strip():
+            st.success(coach_reply(doubt, current_day))
+        else:
+            st.warning("Doubt type pannunga.")
 
     save(data)
-
-    # =========================
-    # FINAL SUBMIT
-    # =========================
 
     if st.button("FINAL SUBMIT 🔒"):
 
@@ -337,7 +486,6 @@ if not challenge.get("unlocked_main_game", False):
         )
 
         if not all_done:
-
             st.error("""
 ❌ TASK MISSED
 
@@ -348,19 +496,18 @@ Back to DAY 1
             challenge["completed_days"] = []
             challenge["day"] = 1
             challenge["failed"] = True
+            data["challenge_progress"] = {}
 
             save(data)
             st.stop()
 
         else:
-
             if today_str not in challenge["completed_days"]:
                 challenge["completed_days"].append(today_str)
 
             challenge["day"] = len(challenge["completed_days"]) + 1
             challenge["failed"] = False
 
-            # REWARD
             data["xp"] += 100
             data["points"] += 100
 
