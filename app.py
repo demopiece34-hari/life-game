@@ -166,6 +166,28 @@ data = load()
 today = date.today()
 today_str = str(today)
 
+data["streak"] = compute_streak(data.get("history", {}))
+data["best_streak"] = max(data.get("best_streak", 0), data["streak"])
+save(data)
+
+# LOGIN
+if "login" not in st.session_state:
+    st.session_state.login = False
+
+if not st.session_state.login:
+    st.title("🔐 Login")
+    user = st.text_input("Username", key="login_user")
+    pwd = st.text_input("Password", type="password", key="login_pwd")
+
+    if st.button("LOGIN", key="login_btn"):
+        if user == LOGIN_USER and pwd == LOGIN_PASS:
+            st.session_state.login = True
+            st.success("Login Success ⛓️‍💥")
+            st.rerun()
+        else:
+            st.error("Wrong credentials 🔗")
+    st.stop()
+
 # =========================
 # 60 DAYS HARD RESET MODE
 # Add this AFTER:
@@ -303,28 +325,6 @@ Back to DAY 1
 
             st.rerun()
 
-    st.stop()
-
-data["streak"] = compute_streak(data.get("history", {}))
-data["best_streak"] = max(data.get("best_streak", 0), data["streak"])
-save(data)
-
-# LOGIN
-if "login" not in st.session_state:
-    st.session_state.login = False
-
-if not st.session_state.login:
-    st.title("🔐 Login")
-    user = st.text_input("Username", key="login_user")
-    pwd = st.text_input("Password", type="password", key="login_pwd")
-
-    if st.button("LOGIN", key="login_btn"):
-        if user == LOGIN_USER and pwd == LOGIN_PASS:
-            st.session_state.login = True
-            st.success("Login Success ⛓️‍💥")
-            st.rerun()
-        else:
-            st.error("Wrong credentials 🔗")
     st.stop()
 
 # CAPTCHA
