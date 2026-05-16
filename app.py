@@ -187,6 +187,7 @@ if not st.session_state.login:
         else:
             st.error("Wrong credentials 🔗")
     st.stop()
+
 # =========================
 # 60 DAYS HARD RESET MODE
 # Login block ku keela, # CAPTCHA ku mela paste pannunga
@@ -215,6 +216,7 @@ challenge_tasks = [
     "Reading 20min 📚"
 ]
 
+
 def coach_reply(q, current_day):
     q = q.lower()
 
@@ -234,6 +236,7 @@ def coach_reply(q, current_day):
         return f"🔥 Ippo Day {current_day}/60. 60 days complete panna main LIFE GAME unlock aagum."
     else:
         return "🧠 Rule simple: daily all tasks complete pannu. One task miss na reset."
+
 
 if not challenge.get("unlocked_main_game", False):
 
@@ -269,98 +272,105 @@ if not challenge.get("unlocked_main_game", False):
         coach_msg = "Final stage. Main LIFE GAME is near."
 
     st.markdown("""
-    <style>
+<style>
+.challenge-wrap {
+    display: grid;
+    grid-template-columns: 1fr 330px;
+    gap: 22px;
+}
+.hero-card {
+    background: linear-gradient(135deg,#020617,#0f172a,#1e1b4b);
+    border: 1px solid rgba(99,102,241,0.4);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 0 35px rgba(99,102,241,0.35);
+    animation: fadeUp 0.8s ease;
+    color: white;
+}
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px;
+}
+.stat-box {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 18px;
+    text-align: center;
+}
+.warning-box {
+    background: linear-gradient(135deg,rgba(127,29,29,0.7),rgba(30,41,59,0.5));
+    border: 1px solid #ef4444;
+    color: white;
+    padding: 18px;
+    border-radius: 18px;
+    text-align: center;
+    margin: 20px 0;
+    animation: pulseRed 1.8s infinite;
+}
+.coach-panel {
+    position: sticky;
+    top: 20px;
+    background: linear-gradient(135deg,#020617,#082f49);
+    border: 1px solid rgba(34,197,94,0.45);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 0 35px rgba(34,197,94,0.30);
+    animation: fadeRight 0.9s ease;
+    color: white;
+}
+.coach-avatar {
+    font-size: 90px;
+    text-align: center;
+    animation: floatCoach 3s infinite ease-in-out;
+}
+.coach-bubble {
+    background: rgba(14,165,233,0.14);
+    border: 1px solid rgba(56,189,248,0.35);
+    padding: 16px;
+    border-radius: 18px;
+    color: white;
+    margin-top: 12px;
+}
+.glow-title {
+    color: white;
+    text-shadow: 0 0 18px rgba(250,204,21,0.8);
+}
+@keyframes floatCoach {
+    0% {transform: translateY(0) scale(1);}
+    50% {transform: translateY(-14px) scale(1.05);}
+    100% {transform: translateY(0) scale(1);}
+}
+@keyframes pulseRed {
+    0% {box-shadow: 0 0 10px rgba(239,68,68,0.35);}
+    50% {box-shadow: 0 0 28px rgba(239,68,68,0.75);}
+    100% {box-shadow: 0 0 10px rgba(239,68,68,0.35);}
+}
+@keyframes fadeUp {
+    from {opacity:0; transform:translateY(25px);}
+    to {opacity:1; transform:translateY(0);}
+}
+@keyframes fadeRight {
+    from {opacity:0; transform:translateX(30px);}
+    to {opacity:1; transform:translateX(0);}
+}
+@media(max-width:900px){
     .challenge-wrap {
-        display: grid;
-        grid-template-columns: 1fr 330px;
-        gap: 22px;
-    }
-    .hero-card {
-        background: linear-gradient(135deg,#020617,#0f172a,#1e1b4b);
-        border: 1px solid rgba(99,102,241,0.4);
-        border-radius: 24px;
-        padding: 24px;
-        box-shadow: 0 0 35px rgba(99,102,241,0.35);
-        animation: fadeUp 0.8s ease;
-        color: white;
+        grid-template-columns: 1fr;
     }
     .stat-grid {
-        display: grid;
-        grid-template-columns: repeat(4,1fr);
-        gap: 14px;
-    }
-    .stat-box {
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 18px;
-        padding: 18px;
-        text-align: center;
-    }
-    .warning-box {
-        background: linear-gradient(135deg,rgba(127,29,29,0.7),rgba(30,41,59,0.5));
-        border: 1px solid #ef4444;
-        color: white;
-        padding: 18px;
-        border-radius: 18px;
-        text-align: center;
-        margin: 20px 0;
-        animation: pulseRed 1.8s infinite;
+        grid-template-columns: repeat(2,1fr);
     }
     .coach-panel {
-        position: sticky;
-        top: 20px;
-        background: linear-gradient(135deg,#020617,#082f49);
-        border: 1px solid rgba(34,197,94,0.45);
-        border-radius: 24px;
-        padding: 22px;
-        box-shadow: 0 0 35px rgba(34,197,94,0.30);
-        animation: fadeRight 0.9s ease;
-        color: white;
+        position: relative;
+        top: 0;
     }
-    .coach-avatar {
-        font-size: 90px;
-        text-align: center;
-        animation: floatCoach 3s infinite ease-in-out;
-    }
-    .coach-bubble {
-        background: rgba(14,165,233,0.14);
-        border: 1px solid rgba(56,189,248,0.35);
-        padding: 16px;
-        border-radius: 18px;
-        color: white;
-        margin-top: 12px;
-    }
-    .glow-title {
-        color: white;
-        text-shadow: 0 0 18px rgba(250,204,21,0.8);
-    }
-    @keyframes floatCoach {
-        0% {transform: translateY(0) scale(1);}
-        50% {transform: translateY(-14px) scale(1.05);}
-        100% {transform: translateY(0) scale(1);}
-    }
-    @keyframes pulseRed {
-        0% {box-shadow: 0 0 10px rgba(239,68,68,0.35);}
-        50% {box-shadow: 0 0 28px rgba(239,68,68,0.75);}
-        100% {box-shadow: 0 0 10px rgba(239,68,68,0.35);}
-    }
-    @keyframes fadeUp {
-        from {opacity:0; transform:translateY(25px);}
-        to {opacity:1; transform:translateY(0);}
-    }
-    @keyframes fadeRight {
-        from {opacity:0; transform:translateX(30px);}
-        to {opacity:1; transform:translateX(0);}
-    }
-    @media(max-width:900px){
-        .challenge-wrap {grid-template-columns: 1fr;}
-        .stat-grid {grid-template-columns: repeat(2,1fr);}
-        .coach-panel {position: relative; top: 0;}
-    }
-    </style>
-    """, unsafe_allow_html=True)
+}
+</style>
+""", unsafe_allow_html=True)
 
-st.markdown(f"""
+    st.markdown(f"""
 <div class="challenge-wrap">
 
 <div>
@@ -431,7 +441,7 @@ One task miss panna reset. So today full complete pannunga.
 </div>
 """, unsafe_allow_html=True)
 
-st.warning("""
+    st.warning("""
 ⚠️ STRICT RULES
 
 ❌ One task miss panna...
@@ -523,7 +533,7 @@ Back to DAY 1
             st.rerun()
 
     st.stop()
-
+    
 # CAPTCHA
 if "captcha_q" not in st.session_state:
     a = random.randint(10, 50)
