@@ -431,7 +431,7 @@ One task miss panna reset. So today full complete pannunga.
 </div>
 """, unsafe_allow_html=True)
 
-    st.warning("""
+st.warning("""
 ⚠️ STRICT RULES
 
 ❌ One task miss panna...
