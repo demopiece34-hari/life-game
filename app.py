@@ -237,6 +237,30 @@ def coach_reply(q, current_day):
     else:
         return "🧠 Rule simple: daily all tasks complete pannu. One task miss na reset."
 
+def recovery_stage(completed_count):
+    focus = min(100, int((completed_count / 60) * 100))
+    dopamine = min(100, int((completed_count / 60) * 95))
+    self_control = min(100, int((completed_count / 60) * 100))
+    energy = min(100, int((completed_count / 60) * 90))
+    confidence = min(100, int((completed_count / 60) * 85))
+
+    if completed_count < 7:
+        stage = "STARTING RESET"
+        message = "Mind cravings varalam. But daily discipline build aagum."
+    elif completed_count < 15:
+        stage = "CONTROL BUILDING"
+        message = "Focus konjam improve aagum. Phone control strong aagum."
+    elif completed_count < 30:
+        stage = "BRAIN REBALANCE"
+        message = "Energy, confidence, concentration better feel aagalam."
+    elif completed_count < 45:
+        stage = "STRONG DISCIPLINE"
+        message = "Old habit control strong aagum. Self respect increase aagum."
+    else:
+        stage = "GOD MODE LOADING"
+        message = "Lifestyle stable aagum. Main game unlock near."
+
+    return focus, dopamine, self_control, energy, confidence, stage, message
 
 if not challenge.get("unlocked_main_game", False):
 
@@ -253,6 +277,8 @@ if not challenge.get("unlocked_main_game", False):
     completed_count = len(completed_days)
     days_left = 60 - completed_count
     progress_percent = int((completed_count / 60) * 100)
+
+    focus, dopamine, self_control, energy, confidence, recovery_stage_name, recovery_message = recovery_stage(completed_count)
 
     if current_day <= 10:
         coach_face = "🙂"
@@ -437,6 +463,57 @@ Focus pannunga. Consistency dhaan power.
 One task miss panna reset. So today full complete pannunga.
 </div>
 </div>
+
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown(f"""
+<div style="
+background:linear-gradient(135deg,#052e16,#064e3b,#0f172a);
+border:1px solid rgba(34,197,94,0.5);
+border-radius:24px;
+padding:22px;
+margin-top:20px;
+color:white;
+box-shadow:0 0 30px rgba(34,197,94,0.25);
+animation: fadeUp 0.8s ease;
+">
+
+<h2>🧠 LIVE RECOVERY DASHBOARD</h2>
+<h3 style="color:#22c55e;">{recovery_stage_name}</h3>
+<p>{recovery_message}</p>
+
+<p>🎯 Focus Recovery: {focus}%</p>
+<div style="background:#334155;border-radius:20px;height:14px;">
+<div style="background:linear-gradient(90deg,#22c55e,#84cc16);width:{focus}%;height:14px;border-radius:20px;"></div>
+</div>
+
+<p>⚡ Dopamine Balance: {dopamine}%</p>
+<div style="background:#334155;border-radius:20px;height:14px;">
+<div style="background:linear-gradient(90deg,#38bdf8,#22c55e);width:{dopamine}%;height:14px;border-radius:20px;"></div>
+</div>
+
+<p>🛡️ Self Control: {self_control}%</p>
+<div style="background:#334155;border-radius:20px;height:14px;">
+<div style="background:linear-gradient(90deg,#a855f7,#22c55e);width:{self_control}%;height:14px;border-radius:20px;"></div>
+</div>
+
+<p>💪 Energy Level: {energy}%</p>
+<div style="background:#334155;border-radius:20px;height:14px;">
+<div style="background:linear-gradient(90deg,#facc15,#22c55e);width:{energy}%;height:14px;border-radius:20px;"></div>
+</div>
+
+<p>👑 Confidence: {confidence}%</p>
+<div style="background:#334155;border-radius:20px;height:14px;">
+<div style="background:linear-gradient(90deg,#fb7185,#22c55e);width:{confidence}%;height:14px;border-radius:20px;"></div>
+</div>
+
+<hr>
+
+<p style="color:#bbf7d0;">
+✅ No porn + no masturbation + social media control + workout + reading daily follow panna,
+discipline and focus gradually improve aagura mathiri track pannalam.
+</p>
 
 </div>
 """, unsafe_allow_html=True)
