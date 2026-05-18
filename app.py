@@ -516,7 +516,7 @@ discipline and focus gradually improve aagura mathiri track pannalam.
 </p>
 
 </div>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
     st.warning("""
 ⚠️ STRICT RULES
