@@ -519,13 +519,10 @@ discipline and focus gradually improve aagura mathiri track pannalam.
 """, unsafe_allow_html=True)
 
     st.warning("""
-    
 ⚠️ STRICT RULES
-
 ❌ One task miss panna...
 ❌ One bad habit break panna...
 ❌ One day skip panna...
-
 🔥 FULL RESET TO DAY 1
 """)
 
