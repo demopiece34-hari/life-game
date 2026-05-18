@@ -518,7 +518,7 @@ discipline and focus gradually improve aagura mathiri track pannalam.
 </div>
 """, unsafe_allow_html=True)
 
-    st.warning("""
+  st.warning("""
 ⚠️ STRICT RULES
 
 ❌ One task miss panna...
