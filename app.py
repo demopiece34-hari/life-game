@@ -467,7 +467,7 @@ One task miss panna reset. So today full complete pannunga.
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown(f"""
+    st.markdown(f"""
 <div style="
 background:linear-gradient(135deg,#052e16,#064e3b,#0f172a);
 border:1px solid rgba(34,197,94,0.5);
@@ -519,11 +519,14 @@ discipline and focus gradually improve aagura mathiri track pannalam.
 """, unsafe_allow_html=True)
 
     st.warning("""
+    
 ⚠️ STRICT RULES
+
 ❌ One task miss panna...
 ❌ One bad habit break panna...
 ❌ One day skip panna...
 🔥 FULL RESET TO DAY 1
+
 """)
 
     day_key = f"challenge_day_{today_str}"
