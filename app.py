@@ -210,6 +210,7 @@ challenge_tasks = [
     "Instagram Only 8min ⏳",
     "YouTube Only 8min ⏳",
     "Workout 10min 💪",
+    "Bath 🚿",
     "Wake Up 6:00 AM ⏰",
     "10 Pushups 🔥",
     "Breathing 3min 🌬️",
