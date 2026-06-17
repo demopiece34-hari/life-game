@@ -209,6 +209,7 @@ challenge_tasks = [
     "No Masturbation 🚫",
     "NO Instagram  🚫 ",
     "NO YouTube  🚫",
+    "walking 🚶🏼"
     "Bath 🚿",
     "Wake Up 5.30 to 5.55 AM ⏰",
     "10 Pushups 🔥",
@@ -226,7 +227,7 @@ def coach_reply(q, current_day):
         return "▶️ YouTube 8 minutes mattum. Shorts avoid pannunga."
     elif "miss" in q or "fail" in q:
         return "⚠️ One task miss na Day 1 reset. But restart panna defeat illa, discipline training."
-    elif "workout" in q or "pushup" in q:
+    elif "walking" in q or "pushup" in q:
         return "💪 10 mins workout + 10 pushups daily. Small consistency dhaan big change."
     elif "reading" in q:
         return "📚 20 minutes reading phone away vechu silent place la pannunga."
