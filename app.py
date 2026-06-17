@@ -207,13 +207,12 @@ challenge = data["challenge_60"]
 challenge_tasks = [
     "No Porn 🚫",
     "No Masturbation 🚫",
-    "Instagram Only 8min ⏳",
-    "YouTube Only 8min ⏳",
-    "Workout 10min 💪",
+    "NO Instagram  🚫 ",
+    "NO YouTube  🚫",
     "Bath 🚿",
-    "Wake Up 6:00 AM ⏰",
+    "Wake Up 5.30 to 5.55 AM ⏰",
     "10 Pushups 🔥",
-    "Breathing 3min 🌬️",
+    "Breathing 10min 🌬️",
     "Reading 20min 📚"
 ]
 
