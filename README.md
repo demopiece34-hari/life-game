@@ -28,11 +28,11 @@ Default Login:
 
 Username: hari
 
-Password: 9442176514
+Password: 
 
 Reset Password:
 
-h1a2r3i4s5h6
+
 
 (You can change this using Streamlit Secrets for security)
 
