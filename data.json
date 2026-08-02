@@ -13,7 +13,7 @@
   "history": {},
   "badges": [],
   "reasons": {},
-  "start_date": "2026-08-01",
+  "start_date": "2026-08-03",
   "final_submitted": {},
   "locked_days": [],
   "custom_tasks": [],
@@ -26,28 +26,5 @@
   "temp_progress": {},
   "weekly_goals": {},
   "shop_items": [],
-  "unlocked_shop": [],
-  "control_tracker": {
-    "MA001": {
-      "fail_count": 0,
-      "best_clean": 0,
-      "current_clean": 0,
-      "last_fail": ""
-    },
-    "PN002": {
-      "fail_count": 0,
-      "best_clean": 0,
-      "current_clean": 0,
-      "last_fail": ""
-    }
-  },
-  "water_logs": {},
-  "money": {
-    "balance": 0,
-    "income": [],
-    "expense": []
-  },
-  "punishments": {},
-  "punishment_done": {},
-  "life_wheel": {}
+  "unlocked_shop": []
 }
