@@ -497,7 +497,8 @@ elif choice == "🎮 Missions":
                 data.setdefault("control_tracker", default_data()["control_tracker"])
 
                 for bad_task in ["MA001", "PN002"]:
-                    if bad_task in final_missed:
+                    if bad_task not in final_missed:
+                        # ✅ Tick panni irundha = clean day / control maintained
                         data["control_tracker"][bad_task]["current_clean"] += 1
                         data["control_tracker"][bad_task]["best_clean"] = max(
                             data["control_tracker"][bad_task]["best_clean"],
@@ -506,6 +507,7 @@ elif choice == "🎮 Missions":
                         data["xp"] += 30
                         data["points"] += 30
                     else:
+                        # ❌ Tick pannala na = control fail
                         data["control_tracker"][bad_task]["fail_count"] += 1
                         data["control_tracker"][bad_task]["current_clean"] = 0
                         data["control_tracker"][bad_task]["last_fail"] = today_str
